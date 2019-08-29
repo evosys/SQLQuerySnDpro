@@ -1,0 +1,42 @@
+--- BP Summary Count
+select sku_code, COUNT(UP_CODE) as 'count of Outlet' from combined
+group by SKU_CODE
+
+--- IQ Flag Level Data
+select sku_code,packtype,LOCAL_PACKTYPE,COLOR,COUNT(a) Count_of_outlet from 
+(select distinct sku_code,packtype,LOCAL_PACKTYPE,COLOR,rs_code+UP_code a from 
+	combined
+)b
+group by sku_code,packtype,LOCAL_PACKTYPE,COLOR
+--- OUTLET LEVEL Summary
+select cbp.[DT CODE] ,CBP.[DT+POPCODE] as 'DT+POPCODE' 
+,cbp.BP,CLPT.LPT ,CPT.PT,CCLR.CLR
+from  (
+	select RS_CODE as 'DT CODE' ,rs_code+UP_code as 'DT+POPCODE',COunt(rs_code+UP_code) BP from
+	combined a 
+	group by RS_CODE,rs_code+UP_code
+	) CBP 
+		left Join (
+		select a.[DT CODE],a.[DT+POPCODE],COunt(a.local_packtype) LPT from
+		(select distinct RS_CODE as 'DT CODE' ,rs_code+UP_code as 'DT+POPCODE', LOCAL_PACKTYPE from 
+		combined) a 
+		group by a.[DT CODE],a.[DT+POPCODE]
+		) CLPT on CBP.[DT+POPCODE] = CLPT.[DT+POPCODE]
+	left join (
+	select a.[DT CODE],a.[DT+POPCODE],COunt(a.PACKTYPE) PT from
+	(select distinct RS_CODE as 'DT CODE' ,rs_code+UP_code as 'DT+POPCODE', PACKTYPE from 
+	combined) a 
+	group by a.[DT CODE],a.[DT+POPCODE]
+	) CPT on CBP.[DT+POPCODE] = CPT.[DT+POPCODE]
+		left join (
+		select a.[DT CODE],a.[DT+POPCODE],COunt(a.COLOR) CLR from
+		(select distinct RS_CODE as 'DT CODE' ,rs_code+UP_code as 'DT+POPCODE', COLOR from 
+		combined) a 
+		group by a.[DT CODE],a.[DT+POPCODE]
+		) CCLR on CBP.[DT+POPCODE] = CCLR.[DT+POPCODE]
+---
+select a as 'DT+POPCODE',packtype,LOCAL_PACKTYPE,COLOR,COUNT(sku_code) Count_of_SKU from 
+(select distinct sku_code,packtype,LOCAL_PACKTYPE,COLOR,rs_code+UP_code a from 
+combined
+)b
+group by a,packtype,LOCAL_PACKTYPE,COLOR

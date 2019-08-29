@@ -1,0 +1,2 @@
+select pbs_mp_code, pbs_seqid, pbs_period_fr, pbs_period_to, pbs_desc, pbs_scheme_id, pbs_scheme_id2 
+from pb_setup where pbs_scheme_type<>'A'

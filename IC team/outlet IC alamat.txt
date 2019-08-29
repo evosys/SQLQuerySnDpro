@@ -1,0 +1,34 @@
+select d.distributor,
+d.name Nama_Concess ,
+ p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP Kode_Outlet_Leveredge, 
+replace(p.name,char(9),'') Outlet_Name,case 
+	when p.active = 1 then 'Active'
+	when p.active = 0 then 'InActive'
+end Store_ActiveClosed, dlv.comp3_desc AREA , pv.LDESC Province,
+t.LDESC Town, l.ldesc locality, sl.LDESC sub_locality , replace(p.STREET,char(9),'') as 'Address' ,REPLACE(p.POST_CODE,char(9),'') as 'code post', p.LATITUDE,p.LONGITUDE,
+replace(p.market_name,char(9),'') as Nama_pasar,e.ldesc as 'Outlet_Type_Desc/element' ,se.ldesc as 'outlet_sub_type_Desc/Subelement',
+kc.ldesc Banner_Desc,CONVERT(VARCHAR(11),p.identify_on,6) Date_create_pop
+from pop p
+join DISTRIBUTOR d on p.distributor = d.distributor
+join town t on t.TOWN =p.TOWN
+join LOCALITY l on l.LOCALITY = p.LOCALITY and l.TOWN =p.TOWN
+join SUB_LOCALITY sl on sl.TOWN = p.TOWN and sl.LOCALITY =p.LOCALITY and sl.SLOCALITY =p.SLOCALITY
+join PROVINCE pv on pv.PROVINCE = t.PROVINCE
+join (
+select da.DISTRIBUTOR,da.VALUE_COMB,clvl.comp2_desc ,clvl.comp3_desc from DISTRIBUTOR_ASSOCIATION da
+	join
+	vw_complevel clvl on da.VALUE_COMB= clvl.COMPCODE 
+	join 
+	( 
+		select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+		where FIELD_COMB = 'compcode'
+		group by DISTRIBUTOR
+	) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+) dlv on p.distributor = dlv.distributor
+left join sub_element se on p.sub_element = se.sub_element
+left join element e on se.element = e.element
+left join key_customer kc on p.key_customer = kc.key_customer
+
+
+where p.DISTRIBUTOR <> 'UID00001'
+--and p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP in ( '150601200100199241','160610201100198967','357302000200108608')

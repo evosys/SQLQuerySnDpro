@@ -1,0 +1,17 @@
+
+
+select distinct  distributor,DSR,NAME,[201801],[201802],[201803],[201804],[201805],[201806],[201807],[201808],[201809],[201810],[201811],[201812],
+	  [201901],[201902],[201903],[201904],[201905],[201906],[201907],[201908],[201909],[201910],[201911],[201912]
+from 
+(
+select distinct  cm.DISTRIBUTOR,cm.DSR,d.NAME,jw.YEAR+jw.JCNO yearno,cd.SKU from CASHMEMO cm
+left join cashmemo_detail cd on cd.DISTRIBUTOR = cm.distributor and cd.DOC_NO = cm.DOC_NO
+left join jc_week jw on cm.doc_date between jw.start_date and jw.end_date
+left join DSR d on d.DISTRIBUTOR = cm.DISTRIBUTOR and d.DSR = cm.DSR 
+where cm.VISIT_TYPE <> '88' and cm.CASHMEMO_TYPE not in ('17','18','19') and jw.YEAR in ('2018', '2019') ) x
+pivot
+    (
+      Count(SKU) for yearno in ( [201801],[201802],[201803],[201804],[201805],[201806],[201807],[201808],[201809],[201810],[201811],[201812],
+	  [201901],[201902],[201903],[201904],[201905],[201906],[201907],[201908],[201909],[201910],[201911],[201912])
+    ) as PVT
+	

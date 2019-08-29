@@ -1,0 +1,35 @@
+select co.COMP2_DESC RSM,co.COMP3_DESC AREA, x.DISTRIBUTOR,d.name,wh.LDESC WAREHOUSE ,x.SKU,sk.ldesc NAMA_SKU,
+x.sku_type,x.SELL_FACTOR1,[20180903],[20180910],[20180917],[20180924]
+from 
+(
+select distributor,WAREHOUSE,SKU,sku_type,SELL_FACTOR1,[20180903],[20180910],[20180917],[20180924]
+from 
+(select sbd.distributor,sbd.WORKING_DATE,sbd.WAREHOUSE, sbd.SKU ,
+	case when sbd.sku_type ='01' then 'good'
+	when sbd.SKU_TYPE in ('02','03','04') then 'bad'
+	end sku_type
+	, 
+	((sbd.CLOSING_1*b.SELL_FACTOR1)+ (sbd.CLOSING_2*SELL_FACTOR2)+sbd.CLOSING_3) pcs,b.SELL_FACTOR1
+	from STOCK_BATCH_DAILY sbd
+		join batch b on b.sku = sbd.sku
+	where sbd.WORKING_DATE in ('20180903','20180910','20180917','20180924') and b.PRICE_STRUC ='0001' and b.SELL_FACTOR1 <> '0'
+) x	
+pivot
+    (
+      sum(pcs) for WORKING_DATE in ( [20180903],[20180910],[20180917],[20180924])
+    ) as PVT) x
+	--- start comp code
+join (
+select da.distributor, cl.comp2_desc, cl.comp3_desc from distributor_association da
+join vw_complevel cl on da.value_comb = cl.compcode
+join 
+	( 
+		select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+		where FIELD_COMB = 'compcode'
+		group by DISTRIBUTOR
+	) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+where field_comb = 'COMPCODE') co on co.distributor = x.distributor
+---- end comp code
+join DISTRIBUTOR d on d.DISTRIBUTOR = x.DISTRIBUTOR
+join WAREHOUSE wh on wh.DISTRIBUTOR = x.DISTRIBUTOR  and wh.WAREHOUSE = x.WAREHOUSE
+join sku sk on sk.sku = x.sku

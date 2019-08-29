@@ -1,0 +1,15 @@
+select distinct da.DISTRIBUTOR, da.DOC_NO as [DA Number], replace (Invoice_no,char(9),'') as [Invoice Number],
+replace(Shipment_No,char(9),'') as [Shipment Number] 
+,convert(varchar,da.DOC_DATE,105) as [Document Date],
+ case when da_type=0 then 'Auto Intransit' when da_type=1 then'Manual Intransit' end
+as [DA Type], replace(comments,char(9),'') as Remarks,
+(case when status=1 then 'Accepted' when status=0 then 'Pending' end ) as [Status], Net_Amount,td.PROD3,td.category,td.PROD4,td.market,td.PROD5,td.Brand
+from da_head da
+left join (
+select distinct td.distributor, td.SUB_DOCUMENT,td.DOCUMENT,td.DOC_NO,td.WAREHOUSE,s.PROD3,p3.LDESC category,s.PROD4,p4.LDESC market,s.PROD5,p5.LDESC Brand  from TRANS_DETAIL td
+left join sku s on s.sku = td.sku
+left join PROD_LEVEL3 p3 on p3.PROD3 =s.PROD3 and p3.PROD2 = s.PROD2 and p3.PROD1 = s.PROD1
+left join prod_level4 p4 on p4.prod4 =s.prod4 and p4.prod3 = s.prod3 and p4.prod2 = s.PROD2 and p4.prod1 = s.PROD1
+left join prod_level5 p5 on p5.PROD5 =s.PROD5 and p5.prod4 = s.PROD4 and p5.prod3 = s.prod3 and p5.prod2 = s.prod2 and p5.prod1 = s.PROD1
+) td on td.DISTRIBUTOR = da.DISTRIBUTOR and td.SUB_DOCUMENT = da.SUB_DOCUMENT and td.DOCUMENT = da.DOCUMENT and td.DOC_NO = da.DOC_NO and da.WAREHOUSE = td.WAREHOUSE
+where da.DOC_DATE between '20190101' and getdate()

@@ -1,0 +1,19 @@
+select s.SKU,s.LDESC,pl.PROD1,pl.PROD1_DESC,pl.PROD2,pl.PROD2_DESC,pl.PROD3,pl.PROD3_DESC,pl.PROD4,pl.PROD4_DESC,pl.PROD5,pl.PROD5_DESC,pl.PROD6,pl.PROD6_DESC,
+pl.PROD7,pl.PROD7_DESC,pl.PROD8,pl.PROD8_DESC,pl.MASTERSKU,pl.MASTERSKU_DESC
+ from sku s
+left join vw_PRODLEVEL pl on pl.MASTERSKU = s.MASTER_SKU
+
+
+select s.SKU,s.LDESC,ms.PROD1,pl.PROD1_DESC,ms.PROD2,pl.PROD2_DESC,ms.PROD3,pl.PROD3_DESC,ms.PROD4,pl.PROD4_DESC,ms.PROD5,pl.PROD5_DESC,ms.PROD6,pl.PROD6_DESC,
+ms.PROD7,pl.PROD7_DESC,ms.PROD8,pl.PROD8_DESC,ms.MASTER_SKU,pl.MASTERSKU_DESC
+ from sku s
+left join vw_PRODLEVEL pl on pl.MASTERSKU = s.MASTER_SKU
+left join MASTER_SKU ms on ms.MASTER_SKU = s.MASTER_SKU
+left join PROD_LEVEL1 pl1 on pl1.PROD1 = ms.PROD1
+left join PROD_LEVEL2 pl2 on pl2.PROD2 = ms.PROD2 and pl2.PROD1 = ms.PROD1
+left join PROD_LEVEL3 pl3 on pl3.PROD3 = ms.PROD3 and pl3.PROD2 = ms.PROD2 and pl3.PROD1 = ms.PROD1
+left join PROD_LEVEL4 pl4 on pl4.PROD4 = ms.PROD4 and pl4.PROD3 = ms.PROD3 and pl4.PROD2 = ms.PROD2 and pl4.PROD1 = ms.PROD1
+left join PROD_LEVEL5 pl5 on pl5.PROD5 =ms.PROD5 and pl5.PROD4 = ms.PROD4 and pl5.PROD3 = ms.PROD3 and pl5.PROD2 = ms.PROD2 and pl5.PROD1 = ms.PROD1
+left join PROD_LEVEL6 pl6 on pl6.PROD6 = ms.PROD6 and pl6.PROD5 =ms.PROD5 and pl6.PROD4 = ms.PROD4 and pl6.PROD3 = ms.PROD3 and pl6.PROD2 = ms.PROD2 and pl6.PROD1 = ms.PROD1
+left join PROD_LEVEL7 pl7 on  pl7.PROD7 = pl7.PROD7 and pl7.PROD7 = ms.PROD7 and pl7.PROD6 = ms.PROD6 and pl7.PROD5 =ms.PROD5 and pl7.PROD4 = ms.PROD4 and pl7.PROD3 = ms.PROD3 and pl7.PROD2 = ms.PROD2 and pl7.PROD1 = ms.PROD1
+left join PROD_LEVEL8 pl8 on pl8.PROD8 = ms.PROD8 and pl8.PROD7 = pl8.PROD7 and pl8.PROD7 = ms.PROD7 and pl8.PROD6 = ms.PROD6 and pl8.PROD5 =ms.PROD5 and pl8.PROD4 = ms.PROD4 and pl8.PROD3 = ms.PROD3 and pl8.PROD2 = ms.PROD2 and pl8.PROD1 = ms.PROD1

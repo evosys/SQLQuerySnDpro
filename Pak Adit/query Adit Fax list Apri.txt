@@ -1,0 +1,42 @@
+
+select ct2.ldesc as 'Region',ct3.ldesc as 'Area',
+p.Distributor, d.name as 'Distributor Name',p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP as 'Outlet Code',replace(p.name,char(9),'') as 'Outlet Name',
+t.LDESC as 'Town',l.LDESC as 'Locality',sl.LDESC as 'SubLocality',p.Fax_No,
+p.Identify_on as 'Creation Date',
+c.last_trans as 'Last Transaction',
+case p.active when '1' then 'Active' else 'Inactive' end as 'Active/Inactive',
+se.LDESC as 'Outlet SubElement'
+
+from pop p
+join (select DISTRIBUTOR,name,TOWN from DISTRIBUTOR) d on p.DISTRIBUTOR=d.DISTRIBUTOR
+
+join (
+SELECT x.distributor,x.seq_no,x.value_comb FROM distributor_association x 
+inner join (select distributor,max(seq_no)as [seq] FROM distributor_association WHERE field_comb='compcode' group by distributor) y
+on x.distributor=y.distributor and x.seq_no=y.seq
+WHERE x.field_comb='compcode') da on d.distributor=da.distributor
+
+join (select compcode,COMP2,COMP3,LDESC from COMP_TABLE) ct on da.value_comb=ct.compcode
+join (select comp3,ldesc from comp_level3) ct3 on ct.comp3=ct3.comp3
+join (select comp2,ldesc from comp_level2) ct2 on ct.comp2=ct2.comp2
+
+join (select SUB_ELEMENT,ELEMENT,LDESC from SUB_ELEMENT) se on p.SUB_ELEMENT=se.SUB_ELEMENT
+join (select ELEMENT,ldesc from ELEMENT) e on se.ELEMENT=e.element
+
+join TOWN t on p.TOWN=t.TOWN
+join LOCALITY l on p.TOWN+p.LOCALITY=l.TOWN+l.LOCALITY
+join SUB_LOCALITY sl on p.TOWN+p.LOCALITY+p.SLOCALITY=sl.TOWN+sl.LOCALITY+sl.SLOCALITY
+
+left join (select DISTRIBUTOR,
+max(doc_date)as[last_trans],TOWN,LOCALITY,slocality,pop 
+from cashmemo group by 
+DISTRIBUTOR,TOWN,LOCALITY,SLOCALITY,pop)c on p.DISTRIBUTOR=c.distributor 
+and p.TOWN=c.town and p.LOCALITY=c.LOCALITY and p.SLOCALITY=c.slocality and p.POP=c.POP
+
+
+where p.distributor in (
+)
+--and p.ACTIVE = '1'
+group by ct2.ldesc,ct3.ldesc,p.Distributor,d.name,p.TOWN,p.LOCALITY,p.SLOCALITY,p.POP,p.Identify_on,p.fax_no,
+c.last_trans,e.ldesc,se.LDESC,t.LDESC,l.LDESC,sl.LDESC,p.NAME,
+p.active

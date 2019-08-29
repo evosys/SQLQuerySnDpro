@@ -1,0 +1,33 @@
+select mse.* ,jse.Active,jse.InActive
+
+from 
+(
+select se.MASTER_CHANNEL, mc.LDESC as 'Master Channel Desc',
+se.CHANNEL,c.LDESC 'Channel Desc',
+se.SUB_CHANNEL,sc.LDESC 'Sub Channel Desc',
+ se.ELEMENT,e.LDESC 'Element Desc',
+ se.SUB_ELEMENT,se.LDESC 'Sub Element Desc' 
+ from SUB_ELEMENT se
+join ELEMENT e on e.ELEMENT = se.ELEMENT and e.SUB_CHANNEL = se.SUB_CHANNEL and e.CHANNEL = se.CHANNEL and e.MASTER_CHANNEL = se.MASTER_CHANNEL
+join SUB_CHANNEL sc on sc.SUB_CHANNEL = se.SUB_CHANNEL and sc.CHANNEL =se.CHANNEL and sc.MASTER_CHANNEL = se.MASTER_CHANNEL
+join CHANNEL c on c.CHANNEL = se.CHANNEL and c.MASTER_CHANNEL = se.MASTER_CHANNEL
+join MASTER_CHANNEL mc on mc.MASTER_CHANNEL = se.MASTER_CHANNEL
+) mse
+left join 
+(
+select SUB_ELEMENT,[Active],[InActive]
+from
+(
+select p.SUB_ELEMENT,case 
+	when p.active = 1 then 'Active'
+	when p.active = 0 then 'InActive'
+end Store_ActiveClosed, COUNT(p.pop) a from pop p
+where ISNUMERIC(p.DISTRIBUTOR) = 1 and p.DISTRIBUTOR not in ('15440642','15440643','15441941','15446779','15451130',
+'15451701')
+group by p.SUB_ELEMENT,p.ACTIVE
+) x
+pivot
+    (
+      sum(a) for Store_ActiveClosed in ( [Active],[InActive])
+    ) as PVT
+) jse on jse.SUB_ELEMENT = mse.SUB_ELEMENT

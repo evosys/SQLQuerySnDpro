@@ -1,0 +1,46 @@
+select  p.distributor as 'Distributor Code',
+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP as 'Outlet Code',
+replace(p.name,char(9),'') as 'Outlet Name',
+ t.LDESC Town, l.ldesc Locality,
+sl.LDESC Sublocality ,
+replace(p.STREET,char(9),'') as 'Outlet Address',
+case 
+when p.active = 1 then 'Active'
+when p.active = 0 then 'InActive'
+end as 'Store_Active/Closed', 
+elm.LDESC as 'Outlet Element' ,elm.Desc_se as 'Outlet Subelement' ,p.LATITUDE, p.LONGITUDE,
+sp.PJP as 'PJP  Code',sp.pjp_ldesc as 'PJP Name',
+case 
+when sp.pjp_status = 1 then 'Active'
+when sp.pjp_status = 0 then 'InActive'
+end as 'PJP Status', 
+sp.DSR as 'DSR Code',replace(sp.NAME,char(9),'') as 'DSR Name',
+case 
+when sp.status_DSR = 'Y' then 'Active'
+when sp.status_DSR = 'N' then 'InActive'
+end as 'DSR Status', sp.WEEKS_IN_CYCLE ,
+sp.Sell_ldsc as 'Selling Category', replace(sp.section,char(9),'') as 'Section POP',
+fcm.last_trans as 'Last Transaction'
+
+from pop p
+left join (select se.SUB_ELEMENT,se.LDESC Desc_se ,e.LDESC from SUB_ELEMENT se join ELEMENT e on e.ELEMENT = se.ELEMENT) elm on elm.SUB_ELEMENT = p.SUB_ELEMENT
+left join DISTRIBUTOR dt on dt.DISTRIBUTOR =p.DISTRIBUTOR
+left join town t on t.TOWN =p.TOWN
+left join LOCALITY l on l.LOCALITY = p.LOCALITY and l.TOWN =p.TOWN
+left join SUB_LOCALITY sl on sl.TOWN = p.TOWN and sl.LOCALITY =p.LOCALITY and sl.SLOCALITY =p.SLOCALITY
+-- salees start
+left join (select distinct z.distributor,z.town,z.locality,z.slocality,z.pop,
+z.sell_category,skt.LDESC Sell_ldsc,z.pjp,ph.LDESC pjp_ldesc,ph.pjp_status,ph.WEEKS_IN_CYCLE,ph.DSR,ds.name,ds.status_DSR,z.SECTION section_code,sc.LDESC section from SECTION_POP z
+		join (select DISTRIBUTOR,PJP,LDESC,DSR,sell_category,ACTIVE pjp_status,WEEKS_IN_CYCLE from PJP_HEAD) ph on z.DISTRIBUTOR=ph.DISTRIBUTOR and z.PJP=ph.PJP and z.SELL_CATEGORY=ph.SELL_CATEGORY
+		join (select DISTRIBUTOR,DSR,name,STATUS status_DSR from DSR where job_type <>'02')ds on ph.DISTRIBUTOR=ds.DISTRIBUTOR and ph.DSR=ds.DSR
+		join SECTION sc on sc.DISTRIBUTOR =z.DISTRIBUTOR and sc.SELL_CATEGORY =z.SELL_CATEGORY and sc.SECTION = z.SECTION
+		join SELLING_CATEGORY skt on skt.SELL_CATEGORY = z.SELL_CATEGORY and skt.DISTRIBUTOR = z.DISTRIBUTOR
+) sp on p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP=sp.DISTRIBUTOR+sp.TOWN+sp.LOCALITY+sp.SLOCALITY+sp.POP
+left join (
+		select cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop code_pop , max(cm.doc_date) last_trans
+		from cashmemo cm
+		where visit_type <> '88' 
+		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
+	) fcm on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = fcm.code_pop and p.DISTRIBUTOR = fcm.DISTRIBUTOR
+where p.ACTIVE ='1' and
+ isnumeric(p.distributor)=1

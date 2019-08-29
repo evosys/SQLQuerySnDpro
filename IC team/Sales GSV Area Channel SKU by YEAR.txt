@@ -1,0 +1,34 @@
+
+----  sales area channel SKU by year v2
+
+select distinct AREA, Outlet_element,Outlet_SubElement, sku,SKU_Name, [2018],[2019]
+from 
+(select dlv.comp3_desc AREA ,elm.LDESC Outlet_element,elm.Desc_se Outlet_SubElement , cd.SKU,s.ldesc SKU_Name,jw.YEAR ,sum(cd.amount) Grs
+ from 
+ cashmemo_detail cd
+join cashmemo cm on cd.doc_no = cm.doc_no and cd.distributor = cm.distributor
+join jc_week jw on cm.doc_date between jw.start_date and jw.end_date 
+left join pop p on p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = cm.DISTRIBUTOR+cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP
+join (
+select da.DISTRIBUTOR,da.VALUE_COMB,clvl.comp2_desc ,clvl.comp3_desc from DISTRIBUTOR_ASSOCIATION da
+	join
+	vw_complevel clvl on da.VALUE_COMB= clvl.COMPCODE 
+	join 
+	( 
+		select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+		where FIELD_COMB = 'compcode'
+		group by DISTRIBUTOR
+	) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+) dlv on p.distributor = dlv.distributor
+	join (select se.SUB_ELEMENT,se.LDESC Desc_se ,e.ELEMENT,e.LDESC from SUB_ELEMENT se 
+		join ELEMENT e on e.ELEMENT = se.ELEMENT and e.CHANNEL =se.CHANNEL and e.SUB_CHANNEL = se.SUB_CHANNEL and e.MASTER_CHANNEL =se.MASTER_CHANNEL
+	) elm on elm.SUB_ELEMENT = p.SUB_ELEMENT
+	join sku  s on s.sku = cd.sku 
+where visit_type <> '88'
+and jw.year in ( '2019' ,'2018')
+group by dlv.comp3_desc  ,elm.LDESC ,elm.Desc_se , cd.SKU,s.ldesc,jw.YEAR  ) x
+pivot
+    (
+      sum(Grs) for YEAR in ( [2018],[2019])
+    ) as PVT
+

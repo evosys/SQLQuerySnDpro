@@ -1,0 +1,35 @@
+select distinct dlv.COMP2_DESC Region,dlv.COMP3_DESC Area , ch.Distributor, dt.Name as [Distributor Name], Claim_no as [Claim Number], doc_date as [Claim Date], 
+(case when ch.STATUS ='S' then 'Submitted' when ch.STATUS = 'E' then 'Waiting for Approval' 
+when ch.STATUS ='A' then 'Approved'
+when ch.Status = 'R' then 'Rejected' when ch.STATUS ='C' then 'Cancelled' end) as [Claim Status], 
+ case when CH.CLAIM_TYPE = 'MC' then 'Return To HO'
+when ch.CLAIM_TYPE ='DC' Then 'Fresh Return' when ch.CLAIM_TYPE = 'RA' Then 'Removal'
+
+end [Claim Type],
+cd.SKU , s.LDESC NAMA_SKU,
+cd.ENTERD_QTY1 ENTERD_CS,cd.ENTERD_QTY2 ENTERD_DZ, cd.ENTERD_QTY3 ENTERD_PCS, cd.ENTERED_AMOUNT,
+Net_Amount as [Amount]  
+from claim_head ch
+join CLAIM_DETAIL cd on ch.DOC_NO =cd.DOC_NO and ch.CLAIM_TYPE =cd.CLAIM_TYPE and ch.DISTRIBUTOR =cd.DISTRIBUTOR and ch.DOCUMENT =cd.DOCUMENT and ch.SUB_DOCUMENT =cd.SUB_DOCUMENT 
+join sku  s on s.SKU =cd.SKU
+join (select distinct distributor, name from distributor) dt on ch.distributor = dt.distributor
+join (select Distributor, vc.COMP3_DESC from distributor_association da 
+	  join vw_complevel vc on da.value_comb = vc.compcode
+	  where da.field_comb = 'compcode'
+	)ss on ch.DISTRIBUTOR = ss.DISTRIBUTOR
+
+join (
+select da.DISTRIBUTOR,da.VALUE_COMB,clvl.comp2_desc ,clvl.comp3_desc from DISTRIBUTOR_ASSOCIATION da
+	join
+	vw_complevel clvl on da.VALUE_COMB= clvl.COMPCODE 
+	join 
+	( 
+		select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+		where FIELD_COMB = 'compcode'
+		group by DISTRIBUTOR
+	) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+) dlv on ch.distributor = dlv.distributor
+where ch.status not in ('G','F') and ch.claim_type in ('MC','DC','RA')
+
+--select * from CLAIM_DETAIL where claim_type='DC'
+

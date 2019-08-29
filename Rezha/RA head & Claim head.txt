@@ -1,0 +1,53 @@
+select distinct da.COMP2_DESC as [Region], da.COMP3_DESC as [Area], ch.Distributor, DT.Name, Claim_no, cd.DOC_NO,
+case when ch.status = 'S' then 'Submitted' when ch.STATUS = 'E' then 'Waiting for Approval' when ch.STATUS = 'A' then 'Approved'
+when ch.status = 'R' then 'Rejected' when ch.STATUS = 'C' then 'Cancelled' 
+when ch.STATUS = 'G' and ra.doc_no is not null then 'Good Received'
+when ch.STATUS = 'G' and ra.doc_no is null then 'Good Received[NR not Generated]' 
+when ch.status = 'F' then 'Finalized' 
+When ch.status = 'U' then 'Unsubmitted' end as [Status], 
+cd.SKU, cd.CS, cd.DZ, cd.PC, st.LDESC as [SKU Type], w.LDESC as [Warehouse], w.WAREHOUSE_TYPE,
+case when ch.CLAIM_TYPE ='DC' then 'Fresh Return' when ch.claim_type='RA' then 'Removal' when ch.Claim_type='MC' then 'Return to ULI' end as [Claim Type]
+, lr.LDESC as [Loss Reason], cd.value as [Claim Net Value],ch.REASON_code as [Reason Code], 
+d.INVOICE_NO as [Invoice Number], d.SHIPMENT_NO as [Shipment Number] from claim_head ch
+join (select distinct Distributor, doc_no, sku, sku_type, warehouse,enterd_qty1 as CS, ENTERD_QTY2 as DZ, ENTERD_QTY3 as PC,
+(ENTERED_AMOUNT+ENTERED_DISCOUNT+ENTERED_GST) as value from claim_detail) cd
+on ch.DISTRIBUTOR = cd.DISTRIBUTOR and ch.DOC_NO = cd.DOC_NO
+join warehouse w on ch.distributor = w.DISTRIBUTOR and cd.WAREHOUSE = w.WAREHOUSE 
+join (select distinct distributor, working_Date, Name from distributor where distributor <> 'UID00001')dt on ch.distributor = dt.DISTRIBUTOR
+join sku_type st on cd.SKU_TYPE = st.SKU_TYPE
+join (select Distributor, value_comb, cl.COMP3, cl.COMP3_DESC, cl.comp2, cl.COMP2_DESC from DISTRIBUTOR_ASSOCIATION d
+join vw_COMPLEVEL cl on d.VALUE_COMB = cl.COMPCODE
+where field_comb='compcode') da on ch.DISTRIBUTOR = da.DISTRIBUTOR
+join LOSS_REASON lr on ch.REASON_CODE = lr.ReasonCode
+join da_head d on ch.REF_DOC_NO = d.doc_no and ch.DISTRIBUTOR = d.DISTRIBUTOR
+left join ra_head ra on ch.DISTRIBUTOR = ra.DISTRIBUTOR and ch.doc_no = ra.REF_DOC_NO
+where claim_type in ('DC','MC','RA')
+
+union all
+
+select distinct det.COMP2_DESC as[Region], det.COMP3_DESC as[Area], ra.Distributor, det.NAME as [Name], ra.Doc_no as[Claim or RTU Number], '' as [Document Number],
+case when ra.status=0 and WF_STATUS = 'Y' then 'Approved' when WF_STATUS='0' and WF_SERIAL=0 then 'UnSubmitted'
+when WF_STATUS='R' then 'Rejected' when WF_STATUS='0' and WF_SERIAL=1 then 'UnApproved' 
+when ra.status=1 and wf_status='Y' then 'Stock Generated' end as [Status],
+de.SKU, de.CS, de.DZ, de.PC, de.Typedesc, wh.LDESC, wh.WAREHOUSE_TYPE, do.LDESC,de.reason, de.[Net Value], de.ENTRY_TYPE, da.INVOICE_NO, da.SHIPMENT_NO
+from ra_head ra
+join (select distinct Distributor,td.Document, td.sub_document, Doc_no, SKU, td.SKU_TYPE, st.LDESC as [Typedesc],
+Warehouse, td.entry_type, dt.ldesc as [reason], case when QTY1 = 0 and QTY2=0 and QTY3=0 then REF_QTY1 when REF_QTY1 is null then qty1 end as [CS], 
+case when QTY1 = 0 and QTY2=0 and QTY3=0 then REF_QTY2 when REF_QTY2 is null then qty2 end as [DZ], 
+case when QTY1 = 0 and QTY2=0 and QTY3=0 then REF_QTY3 when REF_QTY3 is null then qty3 end as [PC], 
+Amount+DISCOUNT+gst as [Net Value] from trans_detail td 
+join doc_type dt on td.DOCUMENT = dt.DOCUMENT and td.ENTRY_TYPE = dt.ENTRY_TYPE and td.sub_document = dt.sub_document
+join sku_type st on td.SKU_TYPE = st.SKU_TYPE 
+where td.document='ra'
+)de on ra.DOC_NO = de.DOC_NO and ra.DISTRIBUTOR = de.distributor and ra.SUB_DOCUMENT=de.SUB_DOCUMENT and ra.document = de.DOCUMENT
+and ra.WAREHOUSE = de.WAREHOUSE
+join document do on ra.DOCUMENT = do.DOCUMENT and ra.SUB_DOCUMENT = do.SUB_DOCUMENT
+join warehouse wh on ra.distributor = wh.distributor and ra.warehouse = wh.warehouse
+join da_head da on da.doc_no = ra.ref_doc_no and da.DISTRIBUTOR = ra.DISTRIBUTOR
+join (select distinct dt.Distributor, Name, cl.COMP2_DESC, cl.comp3_desc from distributor dt
+join (select * from DISTRIBUTOR_ASSOCIATION where field_comb='compcode') da on dt.DISTRIBUTOR = da.DISTRIBUTOR 
+join vw_COMPLEVEL cl on da.VALUE_COMB = cl.COMPCODE
+where dt.distributor <>'UID00001'
+)det on ra.DISTRIBUTOR = det.DISTRIBUTOR
+where ra.sub_document<>'04' and ref_document<>'cl' and ra.status=0
+

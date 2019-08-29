@@ -1,0 +1,59 @@
+
+select distinct dlv.COMP2_DESC as 'Region',dlv.COMP3_DESC as 'Area',
+d.Distributor, d.name as 'Distributor Name',ds.DSR,ds.name as 'DSR Name',
+case when ds.COUNTERSALE_YN = 'Y' and ds.JOB_TYPE ='03' then 'Shopsales'
+else  j.LDESC end as 'DSR Type',ds.COUNTERSALE_YN,ds.JOB_TYPE,
+ds.DEVICE_SERIAL_NO,
+case ds.status when 'Y' then 'Active' else 'Inactive' end as 'DSR Status',p.PJP,p.pjpname as'PJP Name',
+p.SELL_CATEGORY as 'Selling Category',p.LDESC as 'Selling Category Desc',
+case p.active when '1' then 'Active' else 'Inactive' end as 'PJP Status',
+case p.DeadAlive when '1' then 'Alive' else 'Dead' end as 'PJP DeadAlive',
+case p.WEEKS_IN_CYCLE when '1' then 'Weekly' else 'BeWeekly' end as 'Weeks cycle',spo.TOT as 'Total Outlet',
+q.LDESC as 'Qualification',
+c.[Last Transaction] as 'Last Transaction',
+case 
+	when c.[Last Transaction] <= DATEADD(DAY, -90, GETDATE()) then 'Yes'
+	else ''
+end as 'LT Over 3 Month' ,
+case 
+	when c.[Last Transaction] IS NULL then 'Yes'
+	else ''
+end NoTransaction,
+case 
+	when c.[Last Transaction] IS NULL or c.[Last Transaction] <= DATEADD(DAY, -90, GETDATE()) then 'Yes'
+	else ''
+end as 'LT Over 3 month and No Trans'
+from DSR ds
+join (select DISTRIBUTOR,name,TOWN from DISTRIBUTOR) d on ds.DISTRIBUTOR=d.DISTRIBUTOR
+
+join (select ph.DISTRIBUTOR,ph.pjp,ph.LDESC pjpname,ph.DSR,ph.SELL_CATEGORY,ph.ACTIVE,s.ldesc ,ph.WEEKS_IN_CYCLE,ph.DeadAlive
+		from PJP_HEAD ph 
+		join (select DISTRIBUTOR,sell_category,ldesc from SELLING_CATEGORY) s on ph.DISTRIBUTOR=s.DISTRIBUTOR and ph.SELL_CATEGORY=s.SELL_CATEGORY
+		) p on ds.DISTRIBUTOR=p.DISTRIBUTOR and ds.DSR=p.dsr
+
+join town t on d.town=t.town
+left join JOB_TYPE j on ds.JOB_TYPE=j.JOB_TYPE
+left join (select DISTRIBUTOR,DSR,PJP,SELL_CATEGORY,MAX(DOC_DATE) as 'Last Transaction'  from cashmemo group by DISTRIBUTOR,DSR,PJP,SELL_CATEGORY) c 
+on ds.DISTRIBUTOR=c.DISTRIBUTOR and ds.DSR=c.DSR and c.PJP = p.PJP and c.SELL_CATEGORY = p.SELL_CATEGORY
+
+	left join (
+		select da.DISTRIBUTOR,da.VALUE_COMB,clvl.comp2_desc ,clvl.comp3_desc from DISTRIBUTOR_ASSOCIATION da
+		join
+		vw_complevel clvl on da.VALUE_COMB= clvl.COMPCODE 
+		join 
+		( 
+			select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+			where FIELD_COMB = 'compcode'
+			group by DISTRIBUTOR
+		) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+	) dlv on d.distributor = dlv.distributor
+left join (select qualification,ldesc from QUALIFICATION) q on ds.QUALIFICATION=q.QUALIFICATION
+left join (select spp.DISTRIBUTOR,spp.PJP,ph.DSR,spp.SELL_CATEGORY,COUNT(spp.POP) TOT from SECTION_POP_PERMANENT spp
+left join PJP_HEAD ph on spp.DISTRIBUTOR = ph.DISTRIBUTOR and spp.PJP =ph.PJP 
+left join pop p on p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.pop = spp.DISTRIBUTOR+spp.TOWN+spp.LOCALITY+spp.SLOCALITY+spp.POP
+where POP_INDEX <> 0 and p.ACTIVE = 1
+ group by spp.DISTRIBUTOR,spp.PJP,ph.DSR,spp.SELL_CATEGORY
+) spo on spo.DISTRIBUTOR = ds.DISTRIBUTOR and ds.DSR = spo.DSR and p.SELL_CATEGORY = spo.SELL_CATEGORY and p.PJP =spo.PJP
+where isnumeric(ds.distributor)=1
+and ds.DISTRIBUTOR not in ('15440642','15440643','15441941','15446779','15451130',
+'15451701')

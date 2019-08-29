@@ -1,0 +1,84 @@
+select dlv.COMP2_DESC Region,dlv.COMP3_DESC Area ,p.distributor,dt.NAME ,'' DT_Status ,
+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP code_le,replace(p.name,char(9),'') Outlet_name,
+ t.LDESC Town, l.ldesc locality, sl.LDESC sub_locality ,replace(p.STREET,char(9),'') Outlet_adress, replace(p.OWNER_NAME,char(9),'') as 'Owner Name',
+case 
+	when p.active = 1 then 'Active'
+	when p.active = 0 then 'InActive'
+end Store_ActiveClosed,elm.element Element_code,
+elm.LDESC Outlet_element ,p.SUB_ELEMENT Sub_element_code,elm.Desc_se Outlet_SubElement,pty.ldesc POP_TYPE ,
+atp.LDESC as 'Area Type',replace(p.market_name,char(9),'') as Nama_pasar,p.LATITUDE, p.LONGITUDE,
+case when p.LATITUDE >= -12.1718 and p.LATITUDE<=6.88969 and p.LONGITUDE>=93.31644 and p.LONGITUDE<= 141.71813 then 'Exist'
+else 'Not Exist' end as 'geotag',ftcm.first_trans,fcm.last_trans,
+sp.DSR,sp.NAME as 'DSR Name' ,sp.PJP ,sp.pjp_desc as 'PJP Name',sp.SECTION,sp.sec_desc as 'Section Name',
+niv.NIV /
+case when ftcm.first_trans < DATEADD(DAY, -90, '20190804') then 13
+when ftcm.first_trans between DATEADD(DAY, -90, '20190804') and DATEADD(DAY, -84, '20190804') then 12
+when ftcm.first_trans between DATEADD(DAY, -83, '20190804') and DATEADD(DAY, -77, '20190804') then 11
+when ftcm.first_trans between DATEADD(DAY, -76, '20190804') and DATEADD(DAY, -70, '20190804') then 10
+when ftcm.first_trans between DATEADD(DAY, -69, '20190804') and DATEADD(DAY, -63, '20190804') then 9
+when ftcm.first_trans between DATEADD(DAY, -62, '20190804') and DATEADD(DAY, -56, '20190804') then 8
+when ftcm.first_trans between DATEADD(DAY, -55, '20190804') and DATEADD(DAY, -49, '20190804') then 7
+when ftcm.first_trans between DATEADD(DAY, -48, '20190804') and DATEADD(DAY, -42, '20190804') then 6
+when ftcm.first_trans between DATEADD(DAY, -41, '20190804') and DATEADD(DAY, -35, '20190804') then 5
+when ftcm.first_trans between DATEADD(DAY, -34, '20190804') and DATEADD(DAY, -28, '20190804') then 4
+when ftcm.first_trans between DATEADD(DAY, -27, '20190804') and DATEADD(DAY, -21, '20190804') then 3
+when ftcm.first_trans between DATEADD(DAY, -20, '20190804') and DATEADD(DAY, -14, '20190804') then 2
+when ftcm.first_trans > DATEADD(DAY, -14, '20190804') then 1
+end as 'RPP WK13' 
+from pop p
+	join AREA_TYPE atp on atp.AREATYPE = p.AREATYPE
+	join pop_type pty on pty.poptype = p.poptype
+	join town t on t.TOWN =p.TOWN
+	join LOCALITY l on l.LOCALITY = p.LOCALITY and l.TOWN =p.TOWN
+	join SUB_LOCALITY sl on sl.TOWN = p.TOWN and sl.LOCALITY =p.LOCALITY and sl.SLOCALITY =p.SLOCALITY
+	left join (select se.SUB_ELEMENT,se.LDESC Desc_se ,e.ELEMENT,e.LDESC from SUB_ELEMENT se 
+		join ELEMENT e on e.ELEMENT = se.ELEMENT and e.CHANNEL =se.CHANNEL and e.SUB_CHANNEL = se.SUB_CHANNEL and e.MASTER_CHANNEL =se.MASTER_CHANNEL
+	) elm on elm.SUB_ELEMENT = p.SUB_ELEMENT
+	left join (select distinct pt.DISTRIBUTOR+pt.TOWN+pt.LOCALITY+pt.SLOCALITY+pt.POP codele, pt.tax_no from POP_TAX pt where pt.TAX_ID = 01) pt on pt.codele =p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP
+	left join (
+		select da.DISTRIBUTOR,da.VALUE_COMB,clvl.comp2_desc ,clvl.comp3_desc from DISTRIBUTOR_ASSOCIATION da
+		join
+		vw_complevel clvl on da.VALUE_COMB= clvl.COMPCODE 
+		join 
+		( 
+			select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+			where FIELD_COMB = 'compcode'
+			group by DISTRIBUTOR
+		) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+	) dlv on p.distributor = dlv.distributor
+	left join DISTRIBUTOR dt on dt.DISTRIBUTOR =p.DISTRIBUTOR
+
+-- salees start
+	left join (
+			select distinct z.distributor+z.town+z.locality+z.slocality+z.pop kode_Lee,z.PJP,ph.pjp_desc,ds.DSR,ds.NAME,z.SECTION,sc.LDESC sec_desc from SECTION_POP z
+				join (select ph.DISTRIBUTOR,ph.pjp,ph.LDESC pjp_desc,ph.DSR,ph.SELL_CATEGORY,ph.ACTIVE,s.ldesc sell_desc
+					from PJP_HEAD ph join (select DISTRIBUTOR,sell_category,ldesc from SELLING_CATEGORY) s on ph.DISTRIBUTOR=s.DISTRIBUTOR and ph.SELL_CATEGORY=s.SELL_CATEGORY
+				) ph on z.DISTRIBUTOR=ph.DISTRIBUTOR and z.PJP=ph.PJP and z.SELL_CATEGORY=ph.SELL_CATEGORY
+				join (select DISTRIBUTOR,DSR,STATUS,name,
+				case when ds.COUNTERSALE_YN = 'Y' and ds.JOB_TYPE ='03' then 'Shopsales' else  j.LDESC end as 'DSR Type'
+				from DSR ds
+				left join JOB_TYPE j on ds.JOB_TYPE=j.JOB_TYPE )ds on ph.DISTRIBUTOR=ds.DISTRIBUTOR and ph.DSR=ds.DSR
+				join SECTION sc on sc.DISTRIBUTOR =z.DISTRIBUTOR and sc.SELL_CATEGORY =z.SELL_CATEGORY and sc.SECTION = z.SECTION
+		where ph.active = 1 and ds.STATUS ='y' and ds.[DSR Type] in ('Order Booker','Spot Seller') and ph.SELL_CATEGORY not in ('401')
+	) sp on p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = sp.kode_Lee 
+left join (
+select cm.distributor, cm.town+cm.locality+cm.slocality+cm.pop codele, sum(((cm.net_amount/1.1)-cm.tot_discount)) NIV
+from cashmemo cm 
+where cm.VISIT_TYPE <> '88' and cm.DOC_DATE between '20190506' and '20190804'
+group by cm.distributor,cm.town+cm.locality+cm.slocality+cm.pop 
+) niv on niv.DISTRIBUTOR = p.DISTRIBUTOR and p.town+p.locality+p.slocality+p.pop = niv.codele
+left join (
+		select cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop code_pop , min(cm.doc_date) first_trans
+		from cashmemo cm
+		where visit_type <> '88' 
+		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
+	) ftcm on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = ftcm.code_pop and p.DISTRIBUTOR = ftcm.DISTRIBUTOR
+	left join (
+		select cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop code_pop , max(cm.doc_date) last_trans
+		from cashmemo cm
+		where cm.VISIT_TYPE = '02' 
+		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
+	) fcm on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = fcm.code_pop and p.DISTRIBUTOR = fcm.DISTRIBUTOR
+where p.ACTIVE ='1' and 
+isnumeric(p.distributor)=1
+

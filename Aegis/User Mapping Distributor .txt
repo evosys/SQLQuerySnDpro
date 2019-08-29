@@ -1,0 +1,15 @@
+
+select dlv.COMP2_DESC,dlv.COMP3_DESC, dm.REF_DISTRIBUTOR,dm.REF_DISTRIBUTOR_NAME, u.USER_ID,u.NAME,u.EMAIL from USER_DISTRIBUTOR_MAPPING dm
+left join USERS u on dm.USER_ID = u.USER_ID and u.DISTRIBUTOR = dm.DISTRIBUTOR
+join (
+		select da.DISTRIBUTOR,da.VALUE_COMB,clvl.comp2_desc ,clvl.comp3_desc from DISTRIBUTOR_ASSOCIATION da
+		join
+		vw_complevel clvl on da.VALUE_COMB= clvl.COMPCODE 
+		join 
+		( 
+			select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+			where FIELD_COMB = 'compcode'
+			group by DISTRIBUTOR
+		) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+	) dlv on dm.REF_DISTRIBUTOR = dlv.distributor
+where  u.USER_ID like '%ASM%'

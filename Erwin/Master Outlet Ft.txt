@@ -1,0 +1,28 @@
+select dlv.COMP2_DESC Region,dlv.COMP3_DESC Area ,p.distributor,dt.NAME ,
+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP code_le,
+case 
+	when p.active = 1 then 'Active'
+	when p.active = 0 then 'InActive'
+end Store_ActiveClosed,ftcm.last_trans as 'First Trans(FT)',jw.YEAR as 'FT Year',jw.JCNO as 'FT JC', jw.WEEK_NO as 'FT Week'
+
+from POP p
+	left join (
+		select da.DISTRIBUTOR,da.VALUE_COMB,clvl.comp2_desc ,clvl.comp3_desc from DISTRIBUTOR_ASSOCIATION da
+		join
+		vw_complevel clvl on da.VALUE_COMB= clvl.COMPCODE 
+		join 
+		( 
+			select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+			where FIELD_COMB = 'compcode'
+			group by DISTRIBUTOR
+		) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+	) dlv on p.distributor = dlv.distributor
+	left join DISTRIBUTOR dt on dt.DISTRIBUTOR =p.DISTRIBUTOR
+	left join (
+		select cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop code_pop , min(cm.doc_date) last_trans
+		from cashmemo cm
+		where visit_type <> '88' 
+		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
+	) ftcm on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = ftcm.code_pop and p.DISTRIBUTOR = ftcm.DISTRIBUTOR
+	left join JC_WEEK jw on ftcm.last_trans between jw.START_DATE and jw.END_DATE
+	where ISNUMERIC(p.distributor) = 1

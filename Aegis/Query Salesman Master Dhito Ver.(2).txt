@@ -1,0 +1,34 @@
+
+select distinct ct2.ldesc as 'Region',ct3.ldesc as 'Area',
+d.Distributor, d.name as 'Distributor Name',ds.DSR,ds.name as 'DSR Name',p.PJP,p.pjpname as'PJP Name',
+p.SELL_CATEGORY as 'Selling Category',p.LDESC as 'Selling Category Desc',
+case p.active when '1' then 'Active' else 'Inactive' end as 'PJP Status',
+case ds.status when 'Y' then 'Active' else 'Inactive' end as 'DSR Status',q.LDESC as 'Qualification',
+case when ds.COUNTERSALE_YN = 'Y' and ds.JOB_TYPE ='03' then 'Shopsales'
+else  j.LDESC end as 'DSR Type',
+ds.DEVICE_SERIAL_NO,MAX(c.DOC_DATE) as 'Last Transaction'
+
+from DSR ds
+join (select DISTRIBUTOR,name,TOWN from DISTRIBUTOR) d on ds.DISTRIBUTOR=d.DISTRIBUTOR
+
+join (select ph.DISTRIBUTOR,ph.pjp,ph.LDESC pjpname,ph.DSR,ph.SELL_CATEGORY,ph.ACTIVE,s.ldesc 
+		from PJP_HEAD ph 
+		join (select DISTRIBUTOR,sell_category,ldesc from SELLING_CATEGORY) s on ph.DISTRIBUTOR=s.DISTRIBUTOR and ph.SELL_CATEGORY=s.SELL_CATEGORY
+		) p on ds.DISTRIBUTOR=p.DISTRIBUTOR and ds.DSR=p.dsr
+
+join town t on d.town=t.town
+left join JOB_TYPE j on ds.JOB_TYPE=j.JOB_TYPE
+left join (select DISTRIBUTOR,doc_date,DSR from cashmemo) c on ds.DISTRIBUTOR=c.DISTRIBUTOR and ds.DSR=c.DSR
+
+join distributor_association da on d.distributor=da.distributor
+join (select compcode,COMP2,COMP3,LDESC from COMP_TABLE) ct on da.value_comb=ct.compcode
+join (select comp3,ldesc from comp_level3 where COMP3 not like 'D%') ct3 on ct.comp3=ct3.comp3
+join (select comp2,ldesc from comp_level2 where COMP2 not like 'D%') ct2 on ct.comp2=ct2.comp2
+
+left join (select qualification,ldesc from QUALIFICATION) q on ds.QUALIFICATION=q.QUALIFICATION
+
+where isnumeric(ds.distributor)=1
+
+group by ct2.ldesc,ct3.ldesc,d.Distributor,d.name,ds.DSR,ds.name,p.pjp,p.pjpname,
+p.SELL_CATEGORY,p.LDESC,p.active,ds.status,q.LDESC,ds.COUNTERSALE_YN,
+ds.JOB_TYPE,j.LDESC,ds.DEVICE_SERIAL_NO

@@ -1,0 +1,51 @@
+
+select region,area,town,COUNT(a.distributor) as '# of DT',sum(a.total_outlet) as 'total all outlet',
+sum(a.total_fast_team) as 'total outlet Fast team', SUM(a.toft) as 'Small Stores under FAST Team', sum(a.Small_Stores) as 'small store'
+from (
+select dlv.COMP2_DESC Region,dlv.COMP3_DESC Area,t.LDESC Town,d.DISTRIBUTOR,
+tot.total_outlet,tft.total_fast_team,smlft.toft  ,soall.toall Small_Stores
+ from DISTRIBUTOR d
+ join TOWN t on d.TOWN =t.TOWN and t.GEOCODE = d.GEOCODE
+ join (
+		select da.DISTRIBUTOR,da.VALUE_COMB,clvl.comp2_desc ,clvl.comp3_desc from DISTRIBUTOR_ASSOCIATION da
+		join
+		vw_complevel clvl on da.VALUE_COMB= clvl.COMPCODE 
+		join 
+		( 
+			select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+			where FIELD_COMB = 'compcode'
+			group by DISTRIBUTOR
+		) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+	) dlv on d.distributor = dlv.distributor
+left join 
+(select p.distributor,count(p.distributor+p.town+p.locality+p.slocality+p.pop) total_outlet from pop p
+group by p.DISTRIBUTOR) tot on tot.DISTRIBUTOR = d.DISTRIBUTOR
+
+left join (
+select sp.DISTRIBUTOR,sp.SELL_CATEGORY, sc.LDESC, COUNT(sp.town+sp.locality+sp.SLOCALITY+sp.POP) total_fast_team from SECTION_POP sp
+join SELLING_CATEGORY sc on sc.SELL_CATEGORY =sp.SELL_CATEGORY and sp.DISTRIBUTOR = sc.DISTRIBUTOR 
+where sc.LDESC like '%fast%'
+group by sp.DISTRIBUTOR,sp.SELL_CATEGORY, sc.LDESC) tft on tft.DISTRIBUTOR = d.DISTRIBUTOR
+
+left join (
+select distributor ,SELL_CATEGORY ,COUNT(x.codele) toft
+from (
+select cm.DISTRIBUTOR,cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP codele,cm.SELL_CATEGORY,SUM(cm.NET_AMOUNT/6) total_cm from CASHMEMO cm
+join SELLING_CATEGORY sc on sc.SELL_CATEGORY =cm.SELL_CATEGORY and cm.DISTRIBUTOR = sc.DISTRIBUTOR 
+where sc.LDESC like '%fast%' and YEAR(cm.DOC_DATE) = '2018' and MONTH(cm.DOC_DATE) in ('04','05','06','07','08','09')
+group by cm.DISTRIBUTOR,cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP,cm.SELL_CATEGORY) x
+where x.total_cm <= '2000000'
+group by distributor ,SELL_CATEGORY) smlft on smlft.DISTRIBUTOR = d.DISTRIBUTOR 
+
+left join (
+select distributor  ,COUNT(x.codele) toall
+from (
+select cm.DISTRIBUTOR,cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP codele,SUM(cm.NET_AMOUNT/6) total_cm from CASHMEMO cm
+join SELLING_CATEGORY sc on sc.SELL_CATEGORY =cm.SELL_CATEGORY and cm.DISTRIBUTOR = sc.DISTRIBUTOR 
+where  YEAR(cm.DOC_DATE) = '2018' and MONTH(cm.DOC_DATE) in ('04','05','06','07','08','09')
+group by cm.DISTRIBUTOR,cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP) x
+where x.total_cm <= '2000000'
+group by distributor 
+) soall on soall.DISTRIBUTOR = d.DISTRIBUTOR ) a
+
+group by region,area,town

@@ -1,0 +1,87 @@
+
+select dlv.COMP2_DESC Region,dlv.COMP3_DESC Area ,p.distributor,dt.NAME 
+, p.town+p.locality+p.slocality+p.pop popcode , replace(p.name,char(9),'') outlet_name ,
+case 
+when p.active = 1 then 'Active'
+when p.active = 0 then 'InActive'
+end Store_ActiveClosed
+,niv.NIV,ftcm.first_trans,
+case when ftcm.first_trans < DATEADD(DAY, -83, '20190310') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20190310') and DATEADD(DAY, -77, '20190310') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20190310') and DATEADD(DAY, -70, '20190310') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20190310') and DATEADD(DAY, -63, '20190310') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20190310') and DATEADD(DAY, -56, '20190310') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20190310') and DATEADD(DAY, -49, '20190310') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20190310') and DATEADD(DAY, -42, '20190310') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20190310') and DATEADD(DAY, -35, '20190310') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20190310') and DATEADD(DAY, -28, '20190310') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20190310') and DATEADD(DAY, -21, '20190310') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20190310') and DATEADD(DAY, -14, '20190310') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20190310') and DATEADD(DAY, -7, '20190310') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20190310') then 1
+end pembagi,[201851],[201852],[201901],[201902],[201903],[201904],[201905],[201906],[201907],[201908],[201909],[201910],[201911],
+niv.NIV /
+case when ftcm.first_trans < DATEADD(DAY, -83, '20190310') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20190310') and DATEADD(DAY, -77, '20190310') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20190310') and DATEADD(DAY, -70, '20190310') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20190310') and DATEADD(DAY, -63, '20190310') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20190310') and DATEADD(DAY, -56, '20190310') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20190310') and DATEADD(DAY, -49, '20190310') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20190310') and DATEADD(DAY, -42, '20190310') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20190310') and DATEADD(DAY, -35, '20190310') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20190310') and DATEADD(DAY, -28, '20190310') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20190310') and DATEADD(DAY, -21, '20190310') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20190310') and DATEADD(DAY, -14, '20190310') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20190310') and DATEADD(DAY, -7, '20190310') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20190310') then 1
+end RPP
+from pop p
+	left join (
+		select da.DISTRIBUTOR,da.VALUE_COMB,clvl.comp2_desc ,clvl.comp3_desc from DISTRIBUTOR_ASSOCIATION da
+		join
+		vw_complevel clvl on da.VALUE_COMB= clvl.COMPCODE 
+		join 
+		( 
+			select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+			where FIELD_COMB = 'compcode'
+			group by DISTRIBUTOR
+		) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+	) dlv on p.distributor = dlv.distributor
+	left join DISTRIBUTOR dt on dt.DISTRIBUTOR =p.DISTRIBUTOR
+left join (
+select cm.distributor, cm.town+cm.locality+cm.slocality+cm.pop codele, sum(((cm.net_amount/1.1)-cm.tot_discount)) NIV
+from cashmemo cm 
+where cm.VISIT_TYPE <> '88' and cm.DOC_DATE between '20181217' and '20190317'
+
+group by cm.distributor,cm.town+cm.locality+cm.slocality+cm.pop 
+) niv on niv.DISTRIBUTOR = p.DISTRIBUTOR and p.town+p.locality+p.slocality+p.pop = niv.codele
+left join (
+		select cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop code_pop , min(cm.doc_date) first_trans
+		from cashmemo cm
+		where visit_type <> '88' 
+		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
+	) ftcm on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = ftcm.code_pop and p.DISTRIBUTOR = ftcm.DISTRIBUTOR
+left join (
+select distinct  distributor,codele, [201851],[201852],[201901],[201902],[201903],[201904],[201905],[201906],[201907],[201908],[201909],[201910],[201911]
+from 
+(
+select cm.distributor, cm.town+cm.locality+cm.slocality+cm.pop codele, jw.year+jw.WEEK_NO jyw,
+ sum(((cm.net_amount/1.1)-cm.tot_discount)) GSV
+from cashmemo cm 
+ join jc_week jw on cm.doc_date between jw.start_date and jw.end_date 
+where cm.VISIT_TYPE <> '88' and jw.year in ('2019','2018')
+group by cm.distributor,cm.town+cm.locality+cm.slocality+cm.pop ,jw.year+jw.WEEK_NO
+) x
+pivot
+    (
+      sum(GSV) for jyw in ([201851],[201852],[201901],[201902],[201903],[201904],[201905],[201906],[201907],[201908],[201909],[201910],[201911])
+    ) as PVT
+)gs on gs.distributor = p.distributor and p.town+p.locality+p.slocality+p.pop = gs.codele
+--GSV end
+
+
+	where --p.ACTIVE ='1' and 
+isnumeric(p.distributor)=1
+
+
+--'20181119' and '20190310'

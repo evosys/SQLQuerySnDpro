@@ -1,0 +1,13 @@
+select distinct z.distributor,z.town,z.locality,z.slocality,z.pop ,z.DISTRIBUTOR+z.TOWN+z.LOCALITY+z.SLOCALITY+z.POP
+
+from SECTION_POP z
+		join (select ph.DISTRIBUTOR,ph.pjp,ph.DSR,ph.SELL_CATEGORY,ph.ACTIVE,s.ldesc 
+		from PJP_HEAD ph join (select DISTRIBUTOR,sell_category,ldesc from SELLING_CATEGORY) s on ph.DISTRIBUTOR=s.DISTRIBUTOR and ph.SELL_CATEGORY=s.SELL_CATEGORY
+			) ph on z.DISTRIBUTOR=ph.DISTRIBUTOR and z.PJP=ph.PJP and z.SELL_CATEGORY=ph.SELL_CATEGORY
+		join (select DISTRIBUTOR,DSR,STATUS,name,
+		case when ds.COUNTERSALE_YN = 'Y' and ds.JOB_TYPE ='03' then 'Shopsales' else  j.LDESC end as 'DSR Type'
+		 from DSR ds
+		left join JOB_TYPE j on ds.JOB_TYPE=j.JOB_TYPE )ds on ph.DISTRIBUTOR=ds.DISTRIBUTOR and ph.DSR=ds.DSR
+		where ph.active = 1 and ds.STATUS ='y' and 
+		ds.[DSR Type] in ('Order Booker','Spot Seller') and ph.SELL_CATEGORY not in ('401')
+and z.DISTRIBUTOR+z.TOWN+z.LOCALITY+z.SLOCALITY+z.POP in ('')

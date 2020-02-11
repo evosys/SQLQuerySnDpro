@@ -1,0 +1,26 @@
+
+select ct3.ldesc as 'Area',d.Distributor,d.NAME, cm.town+cm.locality+cm.slocality+cm.pop as'Outlet Code',
+p.NAME as 'Nama Outlet',e.ldesc as 'Outlet Type', kc.LDESC as 'Banner', cm.SKU, sk.LDESC as 'Nama SKU',
+sum(cm.net) as 'Sales ( Wk 1 - Wk 26 )'
+from pop p
+join (select cm.distributor,visit_type,sub_document,cm.doc_no,cm.DOC_DATE,TOWN,LOCALITY,SLOCALITY,pop,cd.SKU,cd.net from cashmemo cm
+		join (select DISTRIBUTOR,doc_no,sku,doc_date,sum(AMOUNT+GST) as [net],scheme_skushare from cashmemo_detail 
+		group by DISTRIBUTOR,doc_no,sku,doc_date,AMOUNT,GST,scheme_skushare ) cd on cm.DOC_NO=cd.DOC_NO and cm.DISTRIBUTOR=cd.DISTRIBUTOR
+) cm on p.distributor=cm.distributor and p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP=cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP
+
+join sku sk on cm.SKU=sk.SKU
+join JC_WEEK jw on cm.DOC_DATE between jw.START_DATE and jw.END_DATE
+join distributor d on cm.distributor= p.distributor and cm.town=p.town 
+join sub_element se on p.sub_element=se.sub_element
+join element e on se.element=e.element
+join distributor_association da on d.distributor=da.distributor
+join comp_table ct on da.value_comb=ct.compcode
+join comp_level3 ct3 on ct.comp3=ct3.comp3
+join (select KEY_CUSTOMER,ldesc from KEY_CUSTOMER) kc on p.KEY_CUSTOMER=kc.KEY_CUSTOMER
+
+where cm.visit_type='02' and jw.year='2017' and jw.week_no between '1' and '26'
+
+group by ct3.ldesc,d.name,d.distributor,p.name,cm.town+cm.locality+cm.slocality+cm.pop,e.ldesc,kc.LDESC,
+cm.sku,sk.ldesc
+
+

@@ -1,0 +1,25 @@
+
+select distinct ct2.ldesc as 'Region',ct3.ldesc as 'Area',
+d.Distributor, d.name as 'Distributor Name',ds.DSR,ds.name as 'DSR Name',
+case ds.status when 'Y' then 'Active' else 'Inactive' end as 'DSR Status',q.LDESC as 'Qualification',
+ds.countersale_yn,ds.job_type,
+case when ds.COUNTERSALE_YN = 'Y' and ds.JOB_TYPE ='03' then 'Shopsales'
+else  j.LDESC end as 'DSR Type'
+
+from DSR ds
+join (select DISTRIBUTOR,name,TOWN from DISTRIBUTOR) d on ds.DISTRIBUTOR=d.DISTRIBUTOR
+
+
+join town t on d.town=t.town
+left join JOB_TYPE j on ds.JOB_TYPE=j.JOB_TYPE
+left join (select DISTRIBUTOR,doc_date,DSR from cashmemo) c on ds.DISTRIBUTOR=c.DISTRIBUTOR and ds.DSR=c.DSR
+
+join distributor_association da on d.distributor=da.distributor
+join (select compcode,COMP2,COMP3,LDESC from COMP_TABLE) ct on da.value_comb=ct.compcode
+join (select comp3,ldesc from comp_level3 where COMP3 not like 'D%') ct3 on ct.comp3=ct3.comp3
+join (select comp2,ldesc from comp_level2 where COMP2 not like 'D%') ct2 on ct.comp2=ct2.comp2
+
+left join (select qualification,ldesc from QUALIFICATION) q on ds.QUALIFICATION=q.QUALIFICATION
+
+where isnumeric(ds.distributor)=1
+

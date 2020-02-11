@@ -1,0 +1,55 @@
+select  dlv.COMP2_DESC Region,dlv.COMP3_DESC Area ,p.distributor,dt.NAME ,
+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP code_le,
+replace(p.name,char(9),'') Outlet_name, t.LDESC Town, l.ldesc locality,sl.LDESC sub_locality ,
+replace(p.STREET,char(9),'') outlet_address, p.FAX_NO,
+case 
+when p.active = 1 then 'Active'
+when p.active = 0 then 'InActive'
+end Store_ActiveClosed, 
+elm.LDESC Outlet_element ,elm.Desc_se Outlet_SubElement ,p.LATITUDE, p.LONGITUDE,
+replace(p.NIC_NO,char(9),'') NIC_NO, replace(pt.TAX_NO,char(9),'') VAT,
+case when sp.kode_Lee  is null then 'NO'
+else 'YES' end PJP
+,
+case when soo.kode_le is null then 'NO'
+else 'YES'
+end IQ 
+from pop p
+join (select se.SUB_ELEMENT,se.LDESC Desc_se ,e.LDESC from SUB_ELEMENT se join ELEMENT e on e.ELEMENT = se.ELEMENT) elm on elm.SUB_ELEMENT = p.SUB_ELEMENT
+left join POP_TAX pt on pt.DISTRIBUTOR+pt.TOWN+pt.LOCALITY+pt.SLOCALITY+pt.POP =p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP
+join (
+select da.DISTRIBUTOR,da.VALUE_COMB,ct.COMP2,clvl.comp2_desc ,ct.COMP3,clvl.comp3_desc from DISTRIBUTOR_ASSOCIATION da
+	join
+	vw_complevel clvl on da.VALUE_COMB= clvl.COMPCODE 
+	join COMP_TABLE ct on da.VALUE_COMB = ct.COMPCODE
+	join 
+	( 
+		select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+		where FIELD_COMB = 'compcode'
+		group by DISTRIBUTOR
+	) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+) dlv on p.distributor = dlv.distributor
+left join DISTRIBUTOR dt on dt.DISTRIBUTOR =p.DISTRIBUTOR
+join town t on t.TOWN =p.TOWN
+join LOCALITY l on l.LOCALITY = p.LOCALITY and l.TOWN =p.TOWN
+join SUB_LOCALITY sl on sl.TOWN = p.TOWN and sl.LOCALITY =p.LOCALITY and sl.SLOCALITY =p.SLOCALITY
+-- salees start
+left join (select distinct z.distributor+z.town+z.locality+z.slocality+z.pop kode_Lee from SECTION_POP z
+		join (select ph.DISTRIBUTOR,ph.pjp,ph.DSR,ph.SELL_CATEGORY,ph.ACTIVE,s.ldesc 
+		from PJP_HEAD ph join (select DISTRIBUTOR,sell_category,ldesc from SELLING_CATEGORY) s on ph.DISTRIBUTOR=s.DISTRIBUTOR and ph.SELL_CATEGORY=s.SELL_CATEGORY
+	) ph on z.DISTRIBUTOR=ph.DISTRIBUTOR and z.PJP=ph.PJP and z.SELL_CATEGORY=ph.SELL_CATEGORY
+		join (select DISTRIBUTOR,DSR,STATUS,name,
+		case when ds.COUNTERSALE_YN = 'Y' and ds.JOB_TYPE ='03' then 'Shopsales' else  j.LDESC end as 'DSR Type'
+		 from DSR ds
+		left join JOB_TYPE j on ds.JOB_TYPE=j.JOB_TYPE )ds on ph.DISTRIBUTOR=ds.DISTRIBUTOR and ph.DSR=ds.DSR
+		join SECTION sc on sc.DISTRIBUTOR =z.DISTRIBUTOR and sc.SELL_CATEGORY =z.SELL_CATEGORY and sc.SECTION = z.SECTION
+		where ph.active = 1 and ds.STATUS ='y' and ds.[DSR Type] in ('Order Booker','Spot Seller') and ph.SELL_CATEGORY not in ('401')
+) sp on p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = sp.kode_Lee 
+--- Start IQ
+left join (
+select distinct so.rs_code, replace(so.UP_CODE,'-','') kode_LE from SUGGESTED_ORDER so
+	) soo on soo.kode_LE = p.TOWN+p.DISTRIBUTOR+p.LOCALITY+p.SLOCALITY+p.POP
+
+where p.ACTIVE ='1' and
+ isnumeric(p.distributor)=1
+

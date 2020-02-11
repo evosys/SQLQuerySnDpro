@@ -1,0 +1,139 @@
+---req password
+
+select psr.distributor,dt.NAME,com.COMP3_DESC,tdt.tipe ,l.location ,l.ldesc,com2.COMP3_DESC,tdt2.tipe 
+,count(psr.COMPANY)req from PWD_SCREEN_REQ psr
+join location l on psr.location = l.location
+join distributor dt on dt.DISTRIBUTOR =psr.DISTRIBUTOR
+join (
+	select da.distributor,clv.COMP3_DESC from distributor_association da
+	join ( 
+		select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+		where FIELD_COMB = 'compcode'
+		group by DISTRIBUTOR
+		) dbl on da.seq_no = dbl.CNT and dbl.DISTRIBUTOR = da.DISTRIBUTOR
+	join vw_complevel clv on clv.compcode = da.value_comb
+	where da.field_comb = 'COMPCODE' ) com on com.DISTRIBUTOR = psr.DISTRIBUTOR
+join (
+	select da.DISTRIBUTOR ,
+case when  da.VALUE_COMB = '0.3' then 'MT'
+     when da.value_comb = '0.2' then 'GT'
+     end tipe
+  from DISTRIBUTOR_ASSOCIATION da
+where 
+da.FIELD_COMB = 'DA_FIXED_DISCOUNT')
+	 tdt on tdt.DISTRIBUTOR = psr.DISTRIBUTOR
+join (
+	select da.distributor,clv.COMP3_DESC from distributor_association da
+	join ( 
+		select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+		where FIELD_COMB = 'compcode'
+		group by DISTRIBUTOR
+		) dbl on da.seq_no = dbl.CNT and dbl.DISTRIBUTOR = da.DISTRIBUTOR
+	join vw_complevel clv on clv.compcode = da.value_comb
+	where da.field_comb = 'COMPCODE' ) com2 on com2.DISTRIBUTOR = psr.LOCATION
+join (
+	select da.DISTRIBUTOR ,
+case when  da.VALUE_COMB = '0.3' then 'MT'
+     when da.value_comb = '0.2' then 'GT'
+     end tipe
+  from DISTRIBUTOR_ASSOCIATION da
+where 
+da.FIELD_COMB = 'DA_FIXED_DISCOUNT')
+	 tdt2 on tdt2.distributor = psr.LOCATION 
+where psr.request_status ='a' and psr.locked_reason = '02'
+group by psr.distributor,dt.NAME,com.COMP3_DESC,tdt.tipe ,l.location ,l.ldesc,com2.COMP3_DESC,tdt2.tipe
+
+
+-- removal
+
+select * from RA_HEAD
+where doc_date between '20170313' and '20170317'
+--and comments like '%removal%' 
+and sub_document = 01
+and distributor in (
+'15081408','93503001','15088938',
+'15182173','15261555','15178511','15228974','15280990','93012001',
+'15130292','15182691','15109582','15231810','98074001','15131544',
+'15195947','15261556','15135646','15179662','15212473','15230292',
+'15131720','15238859','15107949','15229601','98063001','15086874',
+'15195320','93519001','15207803','15109121','15147533','15210861',
+'15215742','15309234','15240977','15145674','15260125','15088918',
+'15228293','94282001','15167515','15197538','15208733','15163312',
+'15210895','15279835','15315813','15259702','15075341','15204972',
+'94228001','15195377','15271608','15228594','15210705','15198408',
+'15217511','15315814','15154618','93504001','15195745','94207001',
+'15109851','93511001','15300064','93809001','15169121','94032001',
+'15221025','15234943','93801001','15132240','15213176','15228976',
+'15231072','93004001','93011001','15067979','15167935','15310522',
+'15167941','15300300','15234930','15261421','15266921','93808001',
+'15132762','15237950','15251430','15279375','15073854','15310523',
+'15147579','15272641','15266690','15268038','15118791','15167483',
+'15308933','93026001','15087529','15168014','15146746','15247788',
+'15272585','15271602','15280837','15152493','15167710','15112990',
+'15152343','15178499','15250153','15094890','15168016','15146528',
+'15261120','15281632','15301915','93517001','15173423','15195932',
+'15110816','15168779','15142051','15252343','94210001','15147292')
+
+
+-- manual DA
+
+
+select *  from DA_HEAD
+where da_type = '1' and
+doc_date between '20170313' and '20170317'
+and distributor in (
+'15081408','93503001','15088938','15182173',
+'15261555','15178511','15228974','15280990','93012001',
+'15130292','15182691','15109582','15231810','98074001',
+'15131544','15195947','15261556','15135646','15179662',
+'15212473','15230292','15131720','15238859','15107949',
+'15229601','98063001','15086874','15195320','93519001',
+'15207803','15109121','15147533','15210861','15215742',
+'15309234','15240977','15145674','15260125','15088918',
+'15228293','94282001','15167515','15197538','15208733',
+'15163312','15210895','15279835','15315813','15259702',
+'15075341','15204972','94228001','15195377','15271608',
+'15228594','15210705','15198408','15217511','15315814',
+'15154618','93504001','15195745','94207001','15109851',
+'93511001','15300064','93809001','15169121','94032001',
+'15221025','15234943','93801001','15132240','15213176',
+'15228976','15231072','93004001','93011001','15067979',
+'15167935','15310522','15167941','15300300','15234930',
+'15261421','15266921','93808001','15132762','15237950',
+'15251430','15279375','15073854','15310523','15147579',
+'15272641','15266690','15268038','15118791','15167483',
+'15308933','93026001','15087529','15168014','15146746',
+'15247788','15272585','15271602','15280837','15152493',
+'15167710','15112990','15152343','15178499','15250153',
+'15094890','15168016','15146528','15261120','15281632',
+'15301915','93517001','15173423','15195932','15110816',
+'15168779','15142051','15252343','94210001','15147292')
+
+-- request screen
+
+select * from pwd_screen_req
+where between '20170313' and '20170317'
+
+
+-- manual DA yang baru
+
+select da.*, cl.COMP3_DESC  from DA_HEAD da
+join distributor_association das on da.DISTRIBUTOR= das.distributor
+join ( select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+		where FIELD_COMB = 'compcode'
+		group by DISTRIBUTOR) dt on das.SEQ_NO = dt.CNT and das.DISTRIBUTOR = dt.DISTRIBUTOR
+join vw_COMPLEVEL  cl on das.VALUE_COMB = cl.COMPCODE
+where da_type = '1' and
+doc_date between '20170313' and '20170317'
+and das.FIELD_COMB = 'COMPCODE'
+
+-- REMOVAL
+select rh.*, cl.COMP3_DESC  from RA_HEAD rh
+join distributor_association das on rh.DISTRIBUTOR= das.distributor
+join ( select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+		where FIELD_COMB = 'compcode'
+		group by DISTRIBUTOR) dt on das.SEQ_NO = dt.CNT and das.DISTRIBUTOR = dt.DISTRIBUTOR
+join vw_COMPLEVEL  cl on das.VALUE_COMB = cl.COMPCODE
+where doc_date between '20170313' and '20170317'
+and das.FIELD_COMB = 'COMPCODE'
+

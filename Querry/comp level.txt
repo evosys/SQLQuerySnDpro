@@ -1,0 +1,7 @@
+select ct.COMPCODE,ct.LDESC ncompcode, ct.COMP1,cl1.LDESC Ncomp1 ,ct.COMP2,
+cl2.LDESC ncomp2 ,ct.COMP3 ,cl3.LDESC ncomp3 from COMP_TABLE ct
+join COMP_LEVEL1 cl1 on ct.COMP1 = cl1.COMP1
+join COMP_LEVEL2 cl2 on ct.COMP2 = cl2.COMP2 and ct.COMP1=cl2.COMP1
+join COMP_LEVEL3 cl3 on ct.COMP1 = cl3.COMP1 and ct.COMP2=cl3.COMP2 and ct.COMP3 = cl3.COMP3
+
+area lvl 3 dan region lv2

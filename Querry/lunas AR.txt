@@ -1,0 +1,39 @@
+LUNASIN AR    (DT lama tutup)
+
+select distinct distributor,net_amount,received_amt,town+locality+slocality+pop LE_code , Doc_no,doc_date,visit_type,sub_document from cashmemo 
+where visit_type='02' and sub_document='01'
+and received_amt <> net_amount 
+--and distributor='' 
+and distributor+town+locality+slocality+pop in()
+
+
+update cashmemo set received_amt = net_amount 
+where visit_type='02' and sub_document='01' 
+and distributor ='' 
+and received_amt <> net_amount and town+locality+slocality+pop in()
+
+--------------------------------------------------------------------------------------
+
+UNDELIVERED CASHMEMO	(DT lama tutup)
+
+select distinct distributor,net_amount,received_amt,town+locality+slocality+pop LE_code , Doc_no,doc_date,visit_type,sub_document from cashmemo 
+where visit_type='01' and
+distributor+town+locality+slocality+pop in(
+)
+
+update cashmemo set visit_type='88' 
+where distributor in('') and visit_type='01' 
+and town+locality+slocality+pop in()
+
+
+--------------------------------------------------------------------------------------
+
+POP INACTIVE
+
+select active,* from pop where distributor='DT BARU' and active='0'
+
+update pop set active='1' where active='0' and distributor='DT BARU'
+
+------------------------------------------------------------------------
+balikin AR
+="update cashmemo set received_amt = '"&C2&"' where visit_type = '02' and sub_document = '01' and distributor+town+locality+slocality+pop = '"&A2&D2&"' and doc_no = '"&E2&"'"

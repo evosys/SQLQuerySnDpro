@@ -1,0 +1,14 @@
+
+select distinct  distributor,period,STATUS, [1] as 'DT Target',[2] as 'DSR Target'
+		from 
+	
+			(
+select th.distributor,tp.LDESC as 'period',th.TGT_LEVEL,th.STATUS,sum(td.fact01) total from tgt_head th
+left join TGT_DETAIL td on td.TGT_ID = th.TGT_ID
+left join TGT_PERIOD tp on tp.PERIOD_ID = th.PERIOD_ID
+group by th.distributor,tp.LDESC,th.TGT_LEVEL,th.STATUS
+) x
+		pivot
+			(
+			  sum(total) for TGT_LEVEL in ( [1],[2])
+			) as PVT 

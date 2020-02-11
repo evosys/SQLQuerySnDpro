@@ -1,0 +1,45 @@
+---Report B2B Secondary sales
+select dlv.COMP2_DESC REGION,dlv.COMP3_DESC AREA,cm.DISTRIBUTOR,dt.NAME as 'DISTRIBUTOR NAME',PJP as'PJP ID',
+DSR as 'DSR ID',cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP as 'Outlet ID',replace(p.name,char(9),'') as 'Outlet Name',
+elm.element Element_code,elm.LDESC Outlet_element ,p.SUB_ELEMENT Sub_element_code,elm.Desc_se Outlet_SubElement,
+cm.CASHMEMO_TYPE, cm.DOC_NO as 'DOC NO SALES', replace(cm.COMMENTS,char(9),'') COMMENTS,
+convert(varchar,cm.DOC_date,105) as 'DOC DATE',
+convert(varchar,cm.DELV_DATE,105) as 'DELV DATE', cd.SKU,s.LDESC as 'SKU Name',pl3.LDESC as 'Category',
+ ((cd.QTY1*s.SELL_FACTOR1)+ (cd.QTY2*s.SELL_FACTOR2)+cd.QTY3) as 'SERVICE ORDER (Pcs)',
+( ((cd.QTY1*s.SELL_FACTOR1)+ (cd.QTY2*s.SELL_FACTOR2)+cd.QTY3)*s.SELL_WEIGHT3) as 'SERVICE ORDER (Gram)',
+ cd.AMOUNT as 'SERVICE VALUE'
+from cashmemo cm
+	left join (
+		select da.DISTRIBUTOR,da.VALUE_COMB,clvl.comp2_desc ,clvl.comp3_desc from DISTRIBUTOR_ASSOCIATION da
+		join
+		vw_complevel clvl on da.VALUE_COMB= clvl.COMPCODE 
+		join 
+		( 
+			select distinct DISTRIBUTOR, COUNT (DISTRIBUTOR) AS CNT from DISTRIBUTOR_ASSOCIATION
+			where FIELD_COMB = 'compcode'
+			group by DISTRIBUTOR
+		) dbl on da.SEQ_NO= dbl.CNT and dbl.DISTRIBUTOR =da.DISTRIBUTOR
+	) dlv on cm.distributor = dlv.distributor
+	left join DISTRIBUTOR dt on dt.DISTRIBUTOR =cm.DISTRIBUTOR
+join  CASHMEMO_DETAIL  cd on cd.DOC_NO = cm.DOC_NO and cd.DISTRIBUTOR = cm.DISTRIBUTOR
+left join pop p on p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = cm.DISTRIBUTOR+cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP
+left join (select se.SUB_ELEMENT,se.LDESC Desc_se ,e.ELEMENT,e.LDESC from SUB_ELEMENT se 
+		join ELEMENT e on e.ELEMENT = se.ELEMENT and e.CHANNEL =se.CHANNEL and e.SUB_CHANNEL = se.SUB_CHANNEL and e.MASTER_CHANNEL =se.MASTER_CHANNEL
+	) elm on elm.SUB_ELEMENT = p.SUB_ELEMENT
+left join SKU s on s.SKU = cd.SKU
+left join PROD_LEVEL3 pl3 on pl3.PROD1 = s.PROD1 and pl3.PROD2 = s.PROD2 and pl3.PROD3 = s.PROD3
+left join (
+SELECT distributor, SKU,PRICE_STRUC,EFFECTIVE_DATE,
+		LEAD(EFFECTIVE_DATE,1,'99991231') OVER (PARTITION BY distributor,SKU ORDER BY EFFECTIVE_DATE) AS END_DATE,
+		PRICE_UNIT3
+	FROM PRICE_STRUCTURE) pc on pc.SKU =cd.SKU and pc.DISTRIBUTOR = cd.DISTRIBUTOR and cd.DOC_DATE between pc.EFFECTIVE_DATE and pc.END_DATE
+where cm.VISIT_TYPE = '02' and
+cm.DOC_DATE between '20191201' and '20191231'
+and cm.DISTRIBUTOR+cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP in (select distinct DISTRIBUTOR+town+LOCALITY+SLOCALITY+pop from POP_ATTRIBUTE where VALUE_COMB_FROM = 'Y'  and FIELD_COMB in ('eRTM_OUTLET','TELE_OUTLET'))
+
+/*
+and cm.distributor in (
+'15061942','15086082','15094446','15132240','15132762','15139169','15141333','15146248','15162280','15173325',
+'15173721','15197007','15227796','15251536','15261370','15315705','15390663','94418001','94432001','94458001',
+'94801001','94803001','94809001','94810001','94812001','15164231','15072228','91009001','91017001')
+*/

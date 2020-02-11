@@ -1,0 +1,10 @@
+---Report Secondary sales Dawin
+select cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP as 'Outlet ID',cd.SKU
+,sum(cd.AMOUNT) as 'SERVICE VALUE'
+from cashmemo cm
+join  CASHMEMO_DETAIL  cd on cd.DOC_NO = cm.DOC_NO and cd.DISTRIBUTOR = cm.DISTRIBUTOR
+
+where cm.VISIT_TYPE = '02' and
+cm.DOC_DATE between '20190901' and '20190930'
+and cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP in ()
+group by cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP,cd.SKU

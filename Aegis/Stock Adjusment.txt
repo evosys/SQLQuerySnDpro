@@ -1,0 +1,22 @@
+-- Stock Adjusment
+select td.DISTRIBUTOR,td.SKU,s.LDESC as 'SKU Name',st.LDESC as 'SKU Type', sum (GST) from TRANS_DETAIL td
+left join SADJ_HEAD sh on sh.DOC_NO = td.DOC_NO and sh.DOCUMENT = td.DOCUMENT 
+and sh.SUB_DOCUMENT =td.SUB_DOCUMENT and sh.DISTRIBUTOR = td.DISTRIBUTOR
+left join SKU_TYPE st on st.SKU_TYPE = td.SKU_TYPE
+left join sku s on s.SKU = td.SKU
+where sh.DOCUMENT = 'sa' and sh.DOC_DATE between '20190601' and '20190831'
+ and STATUS <> '3' and sh.SUB_DOCUMENT = '01'
+ and td.DISTRIBUTOR in ('15083075',
+'15086874',
+'15228793',
+'91204001',
+'91294001',
+'95029001')
+ group by td.DISTRIBUTOR, td.SKU,s.LDESC,st.LDESC
+
+/*
+status 0 itu san view (san entry)
+status 1 itu san view admin ( entry admin)
+status 3 itu ARN ENTRY 
+
+*/

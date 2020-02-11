@@ -1,0 +1,51 @@
+create table #Temp_week
+(
+    WEEKs varchar(2), 
+    Week_Start int, 
+    Week_End Int
+)
+
+Insert Into #Temp_week (WEEKs,Week_Start,Week_End) 
+VALUES ('40','28','40'),
+('41','29','41'),
+('42','30','42'),
+('43','31','43'),
+('44','32','44'),
+('45','33','45'),
+('46','34','46'),
+('47','35','47'),
+('48','36','48'),
+('49','37','49'),
+('50','38','50'),
+('51','39','51'),
+('52','40','52')
+
+select y.sku,y.weeks,y.Status,count(y.sndpro) total
+from (
+select x.DISTRIBUTOR+x.codele sndpro,x.SKU,tw.WEEKs, 
+case  
+	when SUM(x.gsv) between 1 and 4
+		then 'Monthly'
+	when SUM(x.gsv) between 5 and 8
+		then 'Biweekly'
+	when SUM(x.gsv) between 9 and 13
+		then 'Weekly'
+	end as 'Status'
+from
+(
+select cm.distributor, cm.town+cm.locality+cm.slocality+cm.pop codele,cd.SKU,jw.WEEK_NO yeweek,
+ count(distinct cd.sku) GSV
+from cashmemo cm 
+left join cashmemo_detail cd on cm.doc_no = cd.DOC_NO and cm.DISTRIBUTOR = cd.DISTRIBUTOR
+left join jc_week jw on cm.doc_date between jw.start_date and jw.end_date 
+where cm.VISIT_TYPE = '02' 
+and cm.SUB_DOCUMENT not in ('02','04')
+and jw.YEAR+jw.WEEK_NO in ('201928','201929','201930','201931','201932','201933',
+'201934','201935','201936','201937','201938','201939','201940','201941','201942','201943','201944','201945','201946','201947','201948','201949','201950','201951','201952')
+and cd.sku in ('67698520','67698518','67698516','67929099','67390257','6792907','67501034','67929095','67929093')
+group by cm.distributor,cm.town+cm.locality+cm.slocality+cm.pop ,cd.SKU,jw.WEEK_NO
+) x
+left join #Temp_week tw on x.yeweek between tw.Week_Start and tw.Week_End
+group by x.DISTRIBUTOR+x.codele ,x.SKU,tw.WEEKs
+) y
+group by y.SKU,y.WEEKs,y.Status

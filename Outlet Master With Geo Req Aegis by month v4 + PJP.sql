@@ -1,11 +1,13 @@
 select dlv.COMP2_DESC Region,dlv.COMP3_DESC Area ,p.distributor,dt.NAME ,tdt.LDESC as 'Town Distributor' , dt.WORKING_DATE,
 p.distributor+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP as 'SND outlet Code',p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP as 'Outlet code',replace(p.name,char(9),'') Outlet_name,
  t.LDESC Town, l.ldesc locality, sl.LDESC sub_locality ,replace(p.STREET,char(9),'') Outlet_adress, replace(p.OWNER_NAME,char(9),'') as 'Owner Name',
- replace(p.PHONE_NO,char(9),'') as 'Phone No'  ,replace(p.fax_no,char(9),'') FAX_NO,
+ replace(p.PHONE_NO,char(9),'') as 'Phone No'  ,replace(p.fax_no,char(9),'') FAX_NO,replace(p.DISTRIBUTOR_DISTRICT,char(9),'') as 'DISTRIBUTOR DISTRICT code', replace(dd.LDESC,char(9),'') as 'Distributor Distict Desc',
 case 
 	when p.active = 1 then 'Active'
 	when p.active = 0 then 'InActive'
-end Store_ActiveClosed,ftcm.first_trans as 'First Trans(FT)',jw.YEAR as 'FT Year',jw.JCNO as 'FT JC', jw.WEEK_NO as 'FT Week',
+end Store_ActiveClosed,p.Identify_on as 'Creation Date',
+ftcm.first_trans as 'First Trans(FT)',ftcmt.first_trans as 'First Trans(FT) Tele', ftcmb.first_trans as 'First Trans(FT) B2B',
+jw.YEAR as 'FT Year',jw.JCNO as 'FT JC', jw.WEEK_NO as 'FT Week',
 fcm.last_trans,
 case 
 	when fcm.last_trans >= DATEADD(DAY, -30, GETDATE()) then 'Yes'
@@ -53,245 +55,245 @@ case when ppm.kode_Lee is null then '' else 'YES' end as 'PJP Permanent',
 pjp.dsr,pjp.name,pjp.[DSR Type],pjp.[DSR Status],pjp.PJP,pjp.pjp_desc,pjp.[PJP Status],pjp.[PJP DeadAlive],pjp.[Weeks cycle],
 pjp.SELL_CATEGORY,pjp.sell_desc as 'Selling Category Desc',pjp.SECTION,pjp.sec_desc as 'Section Desc',
 case when soo.kode_le is null then '' else 'YES' end as 'IQ SO',
-gs18.sales as 'GSV 2018',gs19.sales as 'GSV 2019/YTD',
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
-end pembagi,
-GSV.GSV as 'GSV RPP',
+gs18.sales as 'FY GSV 2018',ytd18.gsv as 'YTD 2018',ytd19.gsv as 'YTD 2019',
+GSV.GSV as 'Last 13 WKs',
 GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
-end as 'RPP WK20 - WK32' ,
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
+end as 'RPP 13 WKs' ,
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
+end as 'pembagi RPP 13 WKs',
 --Status RPP
 case when GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end < 0 then 'Minus'
 when GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end = 0 then 'No Trans.'
 when GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end > 0 and GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end < 50000 then '< 50,000'
 when GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end >= 50000 and GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end <= 100000 then '50-100 K'
 when GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end > 100000 and GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end <= 250000 then '100-250 K'
 when GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end > 250000 and GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end <= 500000 then '250-500 K'
 when GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end > 500000  then '> 500,000'
 end as 'Status RPP',
 --Status RPP 2
 case when GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end < 0 then 'Minus'
 when GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end = 0 then 'No Trans.'
 when GSV.GSV /
-case when ftcm.first_trans < DATEADD(DAY, -83, '20190811') then 13
-when ftcm.first_trans between DATEADD(DAY, -83, '20190811') and DATEADD(DAY, -77, '20190811') then 12
-when ftcm.first_trans between DATEADD(DAY, -76, '20190811') and DATEADD(DAY, -70, '20190811') then 11
-when ftcm.first_trans between DATEADD(DAY, -69, '20190811') and DATEADD(DAY, -63, '20190811') then 10
-when ftcm.first_trans between DATEADD(DAY, -62, '20190811') and DATEADD(DAY, -56, '20190811') then 9
-when ftcm.first_trans between DATEADD(DAY, -55, '20190811') and DATEADD(DAY, -49, '20190811') then 8
-when ftcm.first_trans between DATEADD(DAY, -48, '20190811') and DATEADD(DAY, -42, '20190811') then 7
-when ftcm.first_trans between DATEADD(DAY, -41, '20190811') and DATEADD(DAY, -35, '20190811') then 6
-when ftcm.first_trans between DATEADD(DAY, -34, '20190811') and DATEADD(DAY, -28, '20190811') then 5
-when ftcm.first_trans between DATEADD(DAY, -27, '20190811') and DATEADD(DAY, -21, '20190811') then 4
-when ftcm.first_trans between DATEADD(DAY, -20, '20190811') and DATEADD(DAY, -14, '20190811') then 3
-when ftcm.first_trans between DATEADD(DAY, -13, '20190811') and DATEADD(DAY, -7 , '20190811') then 2
-when ftcm.first_trans > DATEADD(DAY, -7, '20190811') then 1
+case when ftcm.first_trans < DATEADD(DAY, -83, '20191215') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20191215') and DATEADD(DAY, -77, '20191215') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20191215') and DATEADD(DAY, -70, '20191215') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20191215') and DATEADD(DAY, -63, '20191215') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20191215') and DATEADD(DAY, -56, '20191215') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20191215') and DATEADD(DAY, -49, '20191215') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20191215') and DATEADD(DAY, -42, '20191215') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20191215') and DATEADD(DAY, -35, '20191215') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20191215') and DATEADD(DAY, -28, '20191215') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20191215') and DATEADD(DAY, -21, '20191215') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20191215') and DATEADD(DAY, -14, '20191215') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20191215') and DATEADD(DAY, -7 , '20191215') then 2
+when ftcm.first_trans > DATEADD(DAY, -7, '20191215') then 1
 end > 0 then 'Positive'
 end as 'Status RPP 2',cso.VALUE_COMB_FROM as 'Call Center Code', tle.VALUE_COMB_FROM as 'Teleorder',b2.VALUE_COMB_FROM as 'B2B'
 from pop p
@@ -329,6 +331,18 @@ from pop p
 		where cm.VISIT_TYPE = '02' 
 		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
 	) ftcm on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = ftcm.code_pop and p.DISTRIBUTOR = ftcm.DISTRIBUTOR
+		left join (
+		select cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop code_pop , min(cm.doc_date) first_trans
+		from cashmemo cm
+		where cm.VISIT_TYPE = '02'  and cm.cashmemo_type = '06'
+		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
+	) ftcmt on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = ftcmt.code_pop and p.DISTRIBUTOR = ftcmt.DISTRIBUTOR
+			left join (
+		select cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop code_pop , min(cm.doc_date) first_trans
+		from cashmemo cm
+		where cm.VISIT_TYPE = '02'  and cm.cashmemo_type = '05'
+		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
+	) ftcmb on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = ftcmb.code_pop and p.DISTRIBUTOR = ftcmb.DISTRIBUTOR
 	left join JC_WEEK jw on ftcm.first_trans between jw.START_DATE and jw.END_DATE
 
 --- Start IQ
@@ -338,37 +352,40 @@ from pop p
 -- salees start
 	left join (
 			select distinct z.distributor+z.town+z.locality+z.slocality+z.pop kode_Lee from SECTION_POP z
-				join (select ph.DISTRIBUTOR,ph.pjp,ph.DSR,ph.SELL_CATEGORY,ph.ACTIVE,s.ldesc 
-					from PJP_HEAD ph join (select DISTRIBUTOR,sell_category,ldesc from SELLING_CATEGORY) s on ph.DISTRIBUTOR=s.DISTRIBUTOR and ph.SELL_CATEGORY=s.SELL_CATEGORY
-				) ph on z.DISTRIBUTOR=ph.DISTRIBUTOR and z.PJP=ph.PJP and z.SELL_CATEGORY=ph.SELL_CATEGORY
-				join (select DISTRIBUTOR,DSR,STATUS,name,
-				case when ds.COUNTERSALE_YN = 'Y' and ds.JOB_TYPE ='03' then 'Shopsales' else  j.LDESC end as 'DSR Type'
-				from DSR ds
-				left join JOB_TYPE j on ds.JOB_TYPE=j.JOB_TYPE )ds on ph.DISTRIBUTOR=ds.DISTRIBUTOR and ph.DSR=ds.DSR
-				join SECTION sc on sc.DISTRIBUTOR =z.DISTRIBUTOR and sc.SELL_CATEGORY =z.SELL_CATEGORY and sc.SECTION = z.SECTION
-		where ph.active = 1 and ds.STATUS ='y' and ds.[DSR Type] in ('Order Booker','Spot Seller') and ph.SELL_CATEGORY not in ('401')
+			left join PJP_HEAD ph on z.DISTRIBUTOR = ph.DISTRIBUTOR and z.PJP =ph.PJP 
+left join dsr d on d.DISTRIBUTOR = z.DISTRIBUTOR and d.DSR = ph.DSR
+where POP_INDEX <> 0
+ and ph.ACTIVE = 1 and d.STATUS = 'Y'
 	) sp on p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = sp.kode_Lee 
---- RPP 
+--- RPP WK27 - WK39
 left join (
 select cm.distributor, cm.town+cm.locality+cm.slocality+cm.pop codele, sum(((cm.net_amount/1.1)-cm.tot_discount)) GSV
 from cashmemo cm 
-where cm.VISIT_TYPE = '02' and cm.DOC_DATE between '20190513' and '20190811'
+where cm.VISIT_TYPE = '02' and cm.DOC_DATE between DATEADD(DAY, -90, '20191215') and '20191215'
 group by cm.distributor,cm.town+cm.locality+cm.slocality+cm.pop 
 ) GSV on GSV.DISTRIBUTOR = p.DISTRIBUTOR and p.town+p.locality+p.slocality+p.pop = GSV.codele
---- RPP WK20 - WK32
+--- RPP FY 2018
 left join (
 		select cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop code_pop ,SUM(((cm.net_amount/1.1)-cm.tot_discount)) sales
 		from cashmemo cm
 		where cm.VISIT_TYPE = '02' and YEAR(cm.doc_date) = '2018'
 		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
 	) gs18 on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = gs18.code_pop and p.DISTRIBUTOR = gs18.DISTRIBUTOR
-	
+--- GSV jan - Nov 2018 
 left join (
-		select cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop code_pop ,SUM(((cm.net_amount/1.1)-cm.tot_discount)) sales
-		from cashmemo cm
-		where cm.VISIT_TYPE = '02' and YEAR(cm.doc_date) = '2019'
-		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
-	) gs19 on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = gs19.code_pop and p.DISTRIBUTOR = gs19.DISTRIBUTOR
+select cm.distributor, cm.town+cm.locality+cm.slocality+cm.pop codele, sum(((cm.net_amount/1.1)-cm.tot_discount)) GSV
+from cashmemo cm 
+where cm.VISIT_TYPE = '02' and cm.DOC_DATE between '20180101' and '20181130'
+group by cm.distributor,cm.town+cm.locality+cm.slocality+cm.pop 
+) ytd18 on ytd18.DISTRIBUTOR = p.DISTRIBUTOR and p.town+p.locality+p.slocality+p.pop = ytd18.codele
+--- GSV jan - Nov 2019  
+left join (
+select cm.distributor, cm.town+cm.locality+cm.slocality+cm.pop codele, sum(((cm.net_amount/1.1)-cm.tot_discount)) GSV
+from cashmemo cm 
+where cm.VISIT_TYPE = '02' and cm.DOC_DATE between '20190101' and '20191130'
+group by cm.distributor,cm.town+cm.locality+cm.slocality+cm.pop 
+) ytd19 on ytd19.DISTRIBUTOR = p.DISTRIBUTOR and p.town+p.locality+p.slocality+p.pop = ytd19.codele
+
 left join (
 select distinct distributor+town+locality+slocality+pop LE_code from cashmemo 
 where visit_type='02' and sub_document='01'
@@ -389,15 +406,16 @@ where visit_type='01'
 left join ( select DISTRIBUTOR+town+LOCALITY+SLOCALITY+pop kode_Lee,VALUE_COMB_FROM from POP_ATTRIBUTE where FIELD_COMB='Call_Center_Code') cso on cso.kode_Lee =p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP
 left join ( select DISTRIBUTOR+town+LOCALITY+SLOCALITY+pop kode_Lee,VALUE_COMB_FROM from POP_ATTRIBUTE where FIELD_COMB='TELE_OUTLET') tle on tle.kode_Lee =p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP
 left join ( select DISTRIBUTOR+town+LOCALITY+SLOCALITY+pop kode_Lee,VALUE_COMB_FROM from POP_ATTRIBUTE where FIELD_COMB='eRTM_OUTLET') b2 on b2.kode_Lee =p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP
+left join DISTRIBUTOR_DISTRICT dd on dd.DISTRIBUTOR = p.DISTRIBUTOR and dd.DISTRIBUTOR_DISTRICT =p.DISTRIBUTOR_DISTRICT
 left join ( 
 	select distinct z.distributor+z.town+z.locality+z.slocality+z.pop kode_Lee,
 	ds.DSR,ds.NAME,ds.[DSR Type],
 	case ds.status when 'Y' then 'Active' else 'Inactive' end as 'DSR Status',
 	z.PJP,ph.pjp_desc,
 	case ph.active when '1' then 'Active' else 'Inactive' end as 'PJP Status',
-case ph.DeadAlive when '1' then 'Alive' else 'Dead' end as 'PJP DeadAlive',
-case ph.WEEKS_IN_CYCLE when '1' then 'Weekly' else 'BeWeekly' end as 'Weeks cycle',
-ph.SELL_CATEGORY,ph.sell_desc,
+	case ph.DeadAlive when '1' then 'Alive' else 'Dead' end as 'PJP DeadAlive',
+	case ph.WEEKS_IN_CYCLE when '1' then 'Weekly' else 'BeWeekly' end as 'Weeks cycle',
+	ph.SELL_CATEGORY,ph.sell_desc,
 	z.SECTION,sc.LDESC sec_desc
 	from SECTION_POP_PERMANENT z
 	join (select ph.DISTRIBUTOR,ph.pjp,ph.LDESC pjp_desc,ph.DSR,ph.SELL_CATEGORY,ph.ACTIVE,ph.DeadAlive,s.ldesc sell_desc,ph.WEEKS_IN_CYCLE

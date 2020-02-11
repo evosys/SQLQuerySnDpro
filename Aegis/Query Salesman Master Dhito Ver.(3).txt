@@ -24,14 +24,14 @@ case
 	else ''
 end as 'LT Over 3 month and No Trans'
 from DSR ds
-join (select DISTRIBUTOR,name,TOWN from DISTRIBUTOR) d on ds.DISTRIBUTOR=d.DISTRIBUTOR
+left join (select DISTRIBUTOR,name,TOWN from DISTRIBUTOR) d on ds.DISTRIBUTOR=d.DISTRIBUTOR
 
-join (select ph.DISTRIBUTOR,ph.pjp,ph.LDESC pjpname,ph.DSR,ph.SELL_CATEGORY,ph.ACTIVE,s.ldesc ,ph.WEEKS_IN_CYCLE,ph.DeadAlive
+left join (select ph.DISTRIBUTOR,ph.pjp,ph.LDESC pjpname,ph.DSR,ph.SELL_CATEGORY,ph.ACTIVE,s.ldesc ,ph.WEEKS_IN_CYCLE,ph.DeadAlive
 		from PJP_HEAD ph 
 		join (select DISTRIBUTOR,sell_category,ldesc from SELLING_CATEGORY) s on ph.DISTRIBUTOR=s.DISTRIBUTOR and ph.SELL_CATEGORY=s.SELL_CATEGORY
 		) p on ds.DISTRIBUTOR=p.DISTRIBUTOR and ds.DSR=p.dsr
 
-join town t on d.town=t.town
+left join town t on d.town=t.town
 left join JOB_TYPE j on ds.JOB_TYPE=j.JOB_TYPE
 left join (select DISTRIBUTOR,DSR,PJP,SELL_CATEGORY,MAX(DOC_DATE) as 'Last Transaction'  from cashmemo group by DISTRIBUTOR,DSR,PJP,SELL_CATEGORY) c 
 on ds.DISTRIBUTOR=c.DISTRIBUTOR and ds.DSR=c.DSR and c.PJP = p.PJP and c.SELL_CATEGORY = p.SELL_CATEGORY

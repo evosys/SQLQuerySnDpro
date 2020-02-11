@@ -39,7 +39,7 @@ z.sell_category,skt.LDESC Sell_ldsc,z.pjp,ph.LDESC pjp_ldesc,ph.pjp_status,ph.WE
 left join (
 		select cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop code_pop , max(cm.doc_date) last_trans
 		from cashmemo cm
-		where visit_type <> '88' 
+		where visit_type = '02'
 		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
 	) fcm on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = fcm.code_pop and p.DISTRIBUTOR = fcm.DISTRIBUTOR
 where p.ACTIVE ='1' and

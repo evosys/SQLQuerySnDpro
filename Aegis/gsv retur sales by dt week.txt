@@ -34,10 +34,9 @@ from cashmemo_detail cd
 left join cashmemo cm on cm.DISTRIBUTOR = cd.DISTRIBUTOR and cm.DOC_NO =cd.DOC_NO
 left join jc_week jw on cm.doc_date between jw.start_date and jw.end_date 
 where cm.VISIT_TYPE = '02' and jw.year = '2019' and  cm.SUB_DOCUMENT in ('02','04')
-and cd.sku in ('67069765',
-'62072024','67543240','67103389','67103391',
-'67465881','67438433','67719165','67477380',
-'21075851','67272001','67502391')
+and cd.sku in ('67562303','67757643','67539007','20066269','21037988','20298942','67271997','67272000',
+'67272001','67467275','20095385','67039482','67457905','67457904','67457902','67457906',
+'67033212','67069765','67069761','21185705')
 and AMOUNT <> 0
 group by cm.distributor,cd.SKU,jw.WEEK_NO
 ) x
@@ -59,10 +58,9 @@ from cashmemo_detail cd
 left join cashmemo cm on cm.DISTRIBUTOR = cd.DISTRIBUTOR and cm.DOC_NO =cd.DOC_NO
 left join jc_week jw on cm.doc_date between jw.start_date and jw.end_date 
 where cm.VISIT_TYPE = '02' and jw.year = '2019' and  cm.SUB_DOCUMENT not in ('02','04')
-and cd.sku in ('67069765',
-'62072024','67543240','67103389','67103391',
-'67465881','67438433','67719165','67477380',
-'21075851','67272001','67502391')
+and cd.sku in ('67562303','67757643','67539007','20066269','21037988','20298942','67271997','67272000',
+'67272001','67467275','20095385','67039482','67457905','67457904','67457902','67457906',
+'67033212','67069765','67069761','21185705')
 and AMOUNT <> 0
 group by cm.distributor,cd.SKU,jw.WEEK_NO
 ) x

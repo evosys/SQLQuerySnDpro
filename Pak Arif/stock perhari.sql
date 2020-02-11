@@ -48,7 +48,7 @@ from
 	((sbd.CLOSING_1*b.SELL_FACTOR1)+ (sbd.CLOSING_2*SELL_FACTOR2)+sbd.CLOSING_3) pcs,b.SELL_FACTOR1
 	from STOCK_BATCH_DAILY sbd
 		join batch b on b.sku = sbd.sku
-	where sbd.WORKING_DATE in ('20190810','20190811') and b.PRICE_STRUC ='0001' and b.SELL_FACTOR1 <> '0'
+	where sbd.WORKING_DATE in (DATEADD(DAY, -1, '20200209'),'20200209') and b.PRICE_STRUC ='0001' and b.SELL_FACTOR1 <> '0'
 ) x	
 --- start comp code
 join (
@@ -77,7 +77,7 @@ left join
 	from STOCK_BATCH_DAILY sbd
 	join price_structure ps on ps.sku = sbd.sku and sbd.DISTRIBUTOR = ps.DISTRIBUTOR
 	join batch b on b.sku = sbd.sku
-	where sbd.WORKING_DATE in ('20190810','20190811') and ps.price_struc = '0001'
+	where sbd.WORKING_DATE in (DATEADD(DAY, -1, '20200209'),'20200209') and ps.price_struc = '0001'
 ) fix
 where fix.value <> 0
 group by fix.DISTRIBUTOR,fix.WORKING_DATE,fix.warehouse,fix.sku,fix.SKU_TYPE
@@ -88,4 +88,4 @@ join sku sk on sk.sku = x.sku
 where x.pcs <> '0' and x.SELL_FACTOR1 <> 0
 
 select distinct DISTRIBUTOR from STOCK_BATCH_DAILY 
-where WORKING_DATE in ('20190810','20190811')
+where WORKING_DATE in (DATEADD(DAY, -1, '20200209'),'20200209')

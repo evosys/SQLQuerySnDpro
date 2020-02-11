@@ -28,7 +28,8 @@ left JOIN 	dbo.SCHEME_DISCOUNT_DETAIL AS SDD ON SD.COMPANY = SDD.COMPANY AND SD.
  SD.[DOCUMENT] = SDD.[DOCUMENT] AND 
  SD.SUB_DOCUMENT = SDD.SUB_DOCUMENT AND 
  SD.DOC_NO = SDD.DOC_NO AND SD.Mp_Code = SDD.Mp_Code AND SD.Seq_Id = SDD.Seq_Id 
- left join pb_setup ps on ps.pbs_mp_code = sd.Mp_Code and sd.Seq_Id =ps.pbs_seqid) sd on sd.DISTRIBUTOR=cm.DISTRIBUTOR and sd.DOC_NO = cm.DOC_NO and sd.DOCUMENT = cm.DOCUMENT and sd.SUB_DOCUMENT = cm.SUB_DOCUMENT
+ left join pb_setup ps on ps.pbs_mp_code = sd.Mp_Code and sd.Seq_Id =ps.pbs_seqid) sd on sd.DISTRIBUTOR=cm.DISTRIBUTOR and
+ sd.DOC_NO = cm.DOC_NO and sd.DOCUMENT = cm.DOCUMENT and sd.SUB_DOCUMENT = cm.SUB_DOCUMENT and sd.sku = cd.sku
  left join DOCUMENT d on d.DOCUMENT = cm.DOCUMENT and d.SUB_DOCUMENT = cm.SUB_DOCUMENT
  left join CASHMEMO_TYPE ct on ct.CASHMEMO_TYPE = cm.CASHMEMO_TYPE
 where cm.VISIT_TYPE = '02' and

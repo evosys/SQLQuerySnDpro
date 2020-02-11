@@ -27,7 +27,7 @@ from
 	((sbd.CLOSING_1*b.SELL_FACTOR1)+ (sbd.CLOSING_2*SELL_FACTOR2)+sbd.CLOSING_3) pcs,b.SELL_FACTOR1
 	from STOCK_BATCH_DAILY sbd
 		join batch b on b.sku = sbd.sku
-	where sbd.WORKING_DATE in ('20190817','20190818') and b.PRICE_STRUC ='0001' and b.SELL_FACTOR1 <> '0'
+	where sbd.WORKING_DATE in (DATEADD(DAY, -1, '20200112'),'20200112') and b.PRICE_STRUC ='0001' and b.SELL_FACTOR1 <> '0'
 ) x	
 --- start comp code
 join (
@@ -52,7 +52,7 @@ from CLAIM_HEAD ch
 join LOSS_REASON lr on ch.REASON_CODE = lr.ReasonCode
 join da_head d on ch.REF_DOC_NO = d.doc_no and ch.DISTRIBUTOR = d.DISTRIBUTOR
 join CLAIM_DETAIL cd on cd.DISTRIBUTOR = ch.DISTRIBUTOR and ch.DOC_NO = cd.DOC_NO and ch.CLAIM_TYPE = cd.CLAIM_TYPE
-where ch.CLAIM_TYPE	in('DC','MC','RA') and ch.DOC_DATE between '20190812' and '20190818') z on z.DISTRIBUTOR = x.DISTRIBUTOR and z.SKU =x.SKU
+where ch.CLAIM_TYPE	in('DC','MC','RA') and ch.DOC_DATE between DATEADD(DAY, -6, '20200112') and '20200112') z on z.DISTRIBUTOR = x.DISTRIBUTOR and z.SKU =x.SKU
 where x.pcs <> '0' and x.SELL_FACTOR1 <> 0 and wh.WAREHOUSE_TYPE ='c'
 
 

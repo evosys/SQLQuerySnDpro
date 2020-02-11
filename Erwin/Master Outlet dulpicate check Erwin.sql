@@ -52,9 +52,7 @@ case
 end DM_Over_month_6,
 p.USER_MODIFY,p.DATE_ENTRY ,p.USER_ENTRY,elm.element Element_code,
 elm.LDESC Outlet_element ,p.SUB_ELEMENT Sub_element_code,elm.Desc_se Outlet_SubElement,pty.ldesc POP_TYPE ,p.LATITUDE, p.LONGITUDE,
-replace(p.NIC_NO,char(9),'') NIC_NO, replace(pt.TAX_NO,char(9),'') VAT,
-case when sp.kode_Lee is null then '' else 'YES' end PJP,
-case when soo.kode_le is null then '' else 'YES' end IQ 
+replace(p.NIC_NO,char(9),'') NIC_NO, replace(pt.TAX_NO,char(9),'') VAT
 from pop p
 	join pop_type pty on pty.poptype = p.poptype
 	join town t on t.TOWN =p.TOWN
@@ -82,23 +80,7 @@ from pop p
 		where visit_type <> '88' 
 		group by cm.DISTRIBUTOR,cm.town+cm.locality+cm.slocality+cm.pop
 	) fcm on p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = fcm.code_pop and p.DISTRIBUTOR = fcm.DISTRIBUTOR
---- Start IQ
-	left join (
-		select distinct so.rs_code, replace(so.UP_CODE,'-','') kode_LE from SUGGESTED_ORDER so where moc_no in (month(getdate()))
-	) soo on soo.kode_LE = p.TOWN+p.DISTRIBUTOR+p.LOCALITY+p.SLOCALITY+p.POP
--- salees start
-	left join (
-			select distinct z.distributor+z.town+z.locality+z.slocality+z.pop kode_Lee from SECTION_POP z
-				join (select ph.DISTRIBUTOR,ph.pjp,ph.DSR,ph.SELL_CATEGORY,ph.ACTIVE,s.ldesc 
-					from PJP_HEAD ph join (select DISTRIBUTOR,sell_category,ldesc from SELLING_CATEGORY) s on ph.DISTRIBUTOR=s.DISTRIBUTOR and ph.SELL_CATEGORY=s.SELL_CATEGORY
-				) ph on z.DISTRIBUTOR=ph.DISTRIBUTOR and z.PJP=ph.PJP and z.SELL_CATEGORY=ph.SELL_CATEGORY
-				join (select DISTRIBUTOR,DSR,STATUS,name,
-				case when ds.COUNTERSALE_YN = 'Y' and ds.JOB_TYPE ='03' then 'Shopsales' else  j.LDESC end as 'DSR Type'
-				from DSR ds
-				left join JOB_TYPE j on ds.JOB_TYPE=j.JOB_TYPE )ds on ph.DISTRIBUTOR=ds.DISTRIBUTOR and ph.DSR=ds.DSR
-				join SECTION sc on sc.DISTRIBUTOR =z.DISTRIBUTOR and sc.SELL_CATEGORY =z.SELL_CATEGORY and sc.SECTION = z.SECTION
-		where ph.active = 1 and ds.STATUS ='y' and ds.[DSR Type] in ('Order Booker','Spot Seller') and ph.SELL_CATEGORY not in ('401')
-	) sp on p.DISTRIBUTOR+p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP = sp.kode_Lee 
+
 where p.ACTIVE ='1' and 
 isnumeric(p.distributor)=1
 and p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP
@@ -109,6 +91,3 @@ where p.ACTIVE ='1' and ISNUMERIC(p.DISTRIBUTOR) = '1'
 group by p.TOWN+p.LOCALITY+p.SLOCALITY+p.POP
 ) b
 where a >1)
-
---select * from COMP_TABLE where compcode ='E55880'
---select * from pop where ACTIVE ='1' and isnumeric(distributor)=1

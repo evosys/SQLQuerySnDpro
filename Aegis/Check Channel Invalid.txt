@@ -1,0 +1,64 @@
+select dlv.COMP2_DESC Region,
+	dlv.COMP3_DESC Area,
+	p.distributor,
+	dt.NAME,p.distributor + p.TOWN + p.LOCALITY + p.SLOCALITY + p.POP as 'SND outlet Code',p.NAME,
+	p.IDENTIFY_ON,p.DATE_APPROVE,p.active,elm.element Element_code,
+	elm.LDESC Outlet_element,
+	p.SUB_ELEMENT Sub_element_code,
+	elm.Desc_se Outlet_SubElement
+from pop p
+left join (
+		select
+			se.SUB_ELEMENT,
+			se.LDESC Desc_se,
+			e.ELEMENT,
+			e.LDESC
+		from
+			SUB_ELEMENT se
+			join ELEMENT e on e.ELEMENT = se.ELEMENT
+			and e.CHANNEL = se.CHANNEL
+			and e.SUB_CHANNEL = se.SUB_CHANNEL
+			and e.MASTER_CHANNEL = se.MASTER_CHANNEL
+	) elm on elm.SUB_ELEMENT = p.SUB_ELEMENT
+	left join (
+		select
+			da.DISTRIBUTOR,
+			da.VALUE_COMB,
+			clvl.comp2_desc,
+			clvl.comp3_desc
+		from
+			DISTRIBUTOR_ASSOCIATION da
+			join vw_complevel clvl on da.VALUE_COMB = clvl.COMPCODE
+			join (
+				select
+					distinct DISTRIBUTOR,
+					COUNT (DISTRIBUTOR) AS CNT
+				from
+					DISTRIBUTOR_ASSOCIATION
+				where
+					FIELD_COMB = 'compcode'
+				group by
+					DISTRIBUTOR
+			) dbl on da.SEQ_NO = dbl.CNT
+			and dbl.DISTRIBUTOR = da.DISTRIBUTOR
+	) dlv on p.distributor = dlv.distributor
+	left join DISTRIBUTOR dt on dt.DISTRIBUTOR = p.DISTRIBUTOR
+where p.sub_element not in ('C16093',
+			'C10028',			'C10660',
+			'C71369',			'C71371',
+			'C71367',			'C71366',
+			'C71372',			'C71373',
+			'C71374','C71518','C10033',
+			'C10034',			'C10026',
+			'C10024',			'C71517')
+			and p.ACTIVE = 1
+			and isnumeric(p.distributor) = 1 -- distributor UFS on SERVER HPC
+	and p.DISTRIBUTOR not in (
+		'15440642',
+		'15440643',
+		'15441941',
+		'15446779',
+		'15451130',
+		'15451701'
+	)
+	order by dlv.COMP2_DESC,dlv.COMP3_DESC,dt.NAME,p.DISTRIBUTOR

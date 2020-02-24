@@ -1,0 +1,1 @@
+="update cashmemo set received_amt = '"&C2&"' where visit_type='02' and sub_document='01' and doc_no ='"&E2&"' and distributor = '"&A2&"'and town+locality+slocality+pop ='"&D2&"'"

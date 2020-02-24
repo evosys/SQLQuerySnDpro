@@ -78,3 +78,66 @@ when x.first_trans between DATEADD(DAY, -18, '20200119') and DATEADD(DAY, -14, '
 when x.first_trans between DATEADD(DAY, -13, '20200119') and DATEADD(DAY, -7 , '20200119') then 2
 when x.first_trans >= DATEADD(DAY, -6, '20200119') then 1
 */
+/* wk 04 2020
+case when ftcm.first_trans < DATEADD(DAY, -83, '20200126') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20200126') and DATEADD(DAY, -77, '20200126') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20200126') and DATEADD(DAY, -70, '20200126') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20200126') and DATEADD(DAY, -63, '20200126') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20200126') and DATEADD(DAY, -56, '20200126') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20200126') and DATEADD(DAY, -49, '20200126') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20200126') and DATEADD(DAY, -42, '20200126') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20200126') and DATEADD(DAY, -35, '20200126') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20200126') and DATEADD(DAY, -26, '20200126') then 5
+when ftcm.first_trans between DATEADD(DAY, -25, '20200126') and DATEADD(DAY, -21, '20200126') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20200126') and DATEADD(DAY, -14, '20200126') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20200126') and DATEADD(DAY, -7 , '20200126') then 2
+when ftcm.first_trans >= DATEADD(DAY, -6, '20200126') then 1
+*/
+
+/* wk 05 2020
+case when ftcm.first_trans < DATEADD(DAY, -83, '20200202') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20200202') and DATEADD(DAY, -77, '20200202') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20200202') and DATEADD(DAY, -70, '20200202') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20200202') and DATEADD(DAY, -63, '20200202') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20200202') and DATEADD(DAY, -56, '20200202') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20200202') and DATEADD(DAY, -49, '20200202') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20200202') and DATEADD(DAY, -42, '20200202') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20200202') and DATEADD(DAY, -33, '20200202') then 6
+when ftcm.first_trans between DATEADD(DAY, -32, '20200202') and DATEADD(DAY, -28, '20200202') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20200202') and DATEADD(DAY, -21, '20200202') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20200202') and DATEADD(DAY, -14, '20200202') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20200202') and DATEADD(DAY, -7 , '20200202') then 2
+when ftcm.first_trans >= DATEADD(DAY, -6, '20200202') then 1
+*/
+
+/* wk 06 2020
+case when ftcm.first_trans < DATEADD(DAY, -83, '20200209') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20200209') and DATEADD(DAY, -77, '20200209') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20200209') and DATEADD(DAY, -70, '20200209') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20200209') and DATEADD(DAY, -63, '20200209') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20200209') and DATEADD(DAY, -56, '20200209') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20200209') and DATEADD(DAY, -49, '20200209') then 8
+when ftcm.first_trans between DATEADD(DAY, -48, '20200209') and DATEADD(DAY, -40, '20200209') then 7
+when ftcm.first_trans between DATEADD(DAY, -39, '20200209') and DATEADD(DAY, -35, '20200209') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20200209') and DATEADD(DAY, -28, '20200209') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20200209') and DATEADD(DAY, -21, '20200209') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20200209') and DATEADD(DAY, -14, '20200209') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20200209') and DATEADD(DAY, -7 , '20200209') then 2
+when ftcm.first_trans >= DATEADD(DAY, -6, '20200209') then 1
+*/
+
+/* wk 07 2020
+case when ftcm.first_trans < DATEADD(DAY, -83, '20200216') then 13
+when ftcm.first_trans between DATEADD(DAY, -83, '20200216') and DATEADD(DAY, -77, '20200216') then 12
+when ftcm.first_trans between DATEADD(DAY, -76, '20200216') and DATEADD(DAY, -70, '20200216') then 11
+when ftcm.first_trans between DATEADD(DAY, -69, '20200216') and DATEADD(DAY, -63, '20200216') then 10
+when ftcm.first_trans between DATEADD(DAY, -62, '20200216') and DATEADD(DAY, -56, '20200216') then 9
+when ftcm.first_trans between DATEADD(DAY, -55, '20200216') and DATEADD(DAY, -47, '20200216') then 8
+when ftcm.first_trans between DATEADD(DAY, -46, '20200216') and DATEADD(DAY, -42, '20200216') then 7
+when ftcm.first_trans between DATEADD(DAY, -41, '20200216') and DATEADD(DAY, -35, '20200216') then 6
+when ftcm.first_trans between DATEADD(DAY, -34, '20200216') and DATEADD(DAY, -28, '20200216') then 5
+when ftcm.first_trans between DATEADD(DAY, -27, '20200216') and DATEADD(DAY, -21, '20200216') then 4
+when ftcm.first_trans between DATEADD(DAY, -20, '20200216') and DATEADD(DAY, -14, '20200216') then 3
+when ftcm.first_trans between DATEADD(DAY, -13, '20200216') and DATEADD(DAY, -7 , '20200216') then 2
+when ftcm.first_trans >= DATEADD(DAY, -6, '20200216') then 1
+*/

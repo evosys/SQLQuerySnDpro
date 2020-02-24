@@ -30,7 +30,7 @@ SELECT distributor, SKU,PRICE_STRUC,EFFECTIVE_DATE,
 		PRICE_UNIT3
 	FROM PRICE_STRUCTURE) pc on pc.SKU =cd.SKU and pc.DISTRIBUTOR = cd.DISTRIBUTOR and cd.DOC_DATE between pc.EFFECTIVE_DATE and pc.END_DATE
 where cm.VISIT_TYPE = '02' and
-cm.DOC_DATE between '20200101' and getdate()
+cm.DOC_DATE between '20200201' and getdate()
 and cm.DISTRIBUTOR+cm.TOWN+cm.LOCALITY+cm.SLOCALITY+cm.POP in (select distinct DISTRIBUTOR+town+LOCALITY+SLOCALITY+pop from POP_ATTRIBUTE where VALUE_COMB_FROM = 'Y'  and FIELD_COMB in ('eRTM_OUTLET','TELE_OUTLET'))
 
 /*
